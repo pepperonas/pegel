@@ -228,4 +228,18 @@ class SoundRepositoryTest {
         assertEquals(6f, stored.working.gainsDb[0])
         assertEquals(loud, stored.activeProfileId)
     }
+
+    // The slider path does not wait for the disk — but it must still reach it, without anyone
+    // calling flush(): a process that dies a moment later may not lose the sound.
+    @Test
+    fun `a change is stored by itself shortly after it was made`() = runBlocking {
+        repo.update { it.withGain(4, 7f) }
+        var stored = fx.store.read().working.gainsDb[4]
+        val deadline = System.currentTimeMillis() + 3000
+        while (stored != 7f && System.currentTimeMillis() < deadline) {
+            Thread.sleep(20)
+            stored = fx.store.read().working.gainsDb[4]
+        }
+        assertEquals(7f, stored)
+    }
 }
