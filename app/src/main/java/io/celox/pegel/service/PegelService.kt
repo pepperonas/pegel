@@ -18,6 +18,7 @@ import io.celox.pegel.data.Profile
 import io.celox.pegel.device.AutoApply
 import io.celox.pegel.device.DeviceKind
 import io.celox.pegel.device.DeviceWatcher
+import io.celox.pegel.ui.common.appLabel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -104,7 +105,7 @@ class PegelService : LifecycleService() {
 
     private fun targetText(e: EngineState): String = when (val t = e.target) {
         Target.GlobalMix -> getString(R.string.target_global)
-        is Target.Players -> t.packages.joinToString { appLabel(it) }
+        is Target.Players -> t.packages.joinToString { appLabel(this, it) }
         Target.None -> getString(if (e.failed) R.string.target_failed else R.string.target_waiting)
     }
 
@@ -112,12 +113,6 @@ class PegelService : LifecycleService() {
         p == null -> getString(R.string.profile_unsaved)
         modified -> getString(R.string.profile_modified, p.name)
         else -> p.name
-    }
-
-    private fun appLabel(pkg: String): String = try {
-        packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
-    } catch (_: Exception) {
-        pkg
     }
 
     companion object {

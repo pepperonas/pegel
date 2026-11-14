@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -32,6 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.celox.pegel.service.ServiceStarter
 import io.celox.pegel.service.handleSessionIntent
+import io.celox.pegel.ui.sound.SoundScreen
 import io.celox.pegel.ui.theme.PegelTheme
 import io.celox.pegel.ui.theme.ThemeMode
 import io.celox.pegel.ui.theme.ThemeSettings
@@ -73,7 +75,14 @@ class MainActivity : ComponentActivity() {
 fun PegelRoot() {
     val nav = rememberNavController()
     val current = nav.currentBackStackEntryAsState().value?.destination?.route
+    fun go(d: Destination) = nav.navigate(d.route) {
+        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
     Scaffold(
+        // Every screen brings its own top bar, which handles the status bar itself.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             // Sub-screens (help) hide the bar: it belongs to the three tabs only.
             if (current == null || Destination.entries.any { it.route == current }) {
@@ -81,13 +90,7 @@ fun PegelRoot() {
                     Destination.entries.forEach { d ->
                         ShortNavigationBarItem(
                             selected = current == d.route,
-                            onClick = {
-                                nav.navigate(d.route) {
-                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            onClick = { go(d) },
                             icon = { Icon(d.icon, contentDescription = null) },
                             label = { Text(stringResource(d.label)) },
                         )
@@ -97,11 +100,14 @@ fun PegelRoot() {
         }
     ) { padding ->
         NavHost(nav, startDestination = Destination.SOUND.route, modifier = Modifier.padding(padding)) {
-            Destination.entries.forEach { d ->
-                composable(d.route) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(d.label)) }
-                }
-            }
+            composable(Destination.SOUND.route) { SoundScreen(onOpenProfiles = { go(Destination.PROFILES) }) }
+            composable(Destination.PROFILES.route) { Placeholder(Destination.PROFILES) }
+            composable(Destination.SETTINGS.route) { Placeholder(Destination.SETTINGS) }
         }
     }
+}
+
+@Composable
+private fun Placeholder(d: Destination) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(d.label)) }
 }
