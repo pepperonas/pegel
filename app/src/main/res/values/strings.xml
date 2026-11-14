@@ -176,4 +176,25 @@
     <string name="help_stops_text">Some phones stop background apps aggressively. Exempt Pegel from battery optimisation in Settings › Running, and allow it to run in the background in your phone\'s own battery settings.</string>
     <string name="help_distortion_title">It distorts or pumps</string>
     <string name="help_distortion_text">Large boosts push the signal against the limit. Lower the bands instead of raising others, reduce loudness, or increase the block size in Settings › Connection.</string>
+    <string name="settings_backup">Backup</string>
+    <string name="backup_hint">Saves all profiles, presets and settings in one file. Nothing leaves your phone unless you move the file.</string>
+    <string name="backup_export">Create backup</string>
+    <string name="backup_restore">Restore backup</string>
+    <string name="backup_exported">Backup saved.</string>
+    <string name="backup_export_failed">The backup could not be written.</string>
+    <string name="backup_restored">Backup restored.</string>
+    <string name="backup_confirm_title">Replace everything?</string>
+    <string name="backup_confirm_text">The file contains %1$d profiles and %2$d presets. Your current profiles, presets and settings will be replaced.</string>
+    <string name="backup_confirm_action">Replace</string>
+    <string name="backup_error_empty">The file is empty.</string>
+    <string name="backup_error_not_json">This is not a Pegel file.</string>
+    <string name="backup_error_not_pegel">This file was not created by Pegel.</string>
+    <string name="backup_error_kind_backup">This is a single profile, not a backup. Import it in the Profiles tab.</string>
+    <string name="backup_error_kind_profile">This is a full backup, not a single profile. Restore it in Settings.</string>
+    <string name="backup_error_newer">This file comes from a newer version of Pegel. Update the app first.</string>
+    <string name="backup_error_read">The file could not be read.</string>
+    <string name="profiles_share">Share</string>
+    <string name="profiles_share_title">Share profile</string>
+    <string name="profiles_import">Import profile from file</string>
+    <string name="profiles_imported">Profile imported.</string>
 </resources>

@@ -175,4 +175,25 @@
     <string name="help_stops_text">Manche Handys beenden Hintergrund-Apps rigoros. Nimm Pegel unter Einstellungen › Betrieb von der Akku-Optimierung aus und erlaube ihm in den Akku-Einstellungen deines Handys den Hintergrundbetrieb.</string>
     <string name="help_distortion_title">Es verzerrt oder pumpt</string>
     <string name="help_distortion_text">Starke Anhebungen drücken das Signal an die Grenze. Senke lieber Bänder ab, statt andere anzuheben, nimm Loudness zurück oder erhöhe die Blockdauer unter Einstellungen › Verbindung.</string>
+    <string name="settings_backup">Sicherung</string>
+    <string name="backup_hint">Speichert alle Profile, Presets und Einstellungen in einer Datei. Nichts verlässt dein Handy, solange du die Datei nicht weitergibst.</string>
+    <string name="backup_export">Sicherung erstellen</string>
+    <string name="backup_restore">Sicherung einspielen</string>
+    <string name="backup_exported">Sicherung gespeichert.</string>
+    <string name="backup_export_failed">Die Sicherung konnte nicht geschrieben werden.</string>
+    <string name="backup_restored">Sicherung eingespielt.</string>
+    <string name="backup_confirm_title">Alles ersetzen?</string>
+    <string name="backup_confirm_text">Die Datei enthält %1$d Profile und %2$d Presets. Deine aktuellen Profile, Presets und Einstellungen werden ersetzt.</string>
+    <string name="backup_confirm_action">Ersetzen</string>
+    <string name="backup_error_empty">Die Datei ist leer.</string>
+    <string name="backup_error_not_json">Das ist keine Pegel-Datei.</string>
+    <string name="backup_error_not_pegel">Diese Datei stammt nicht von Pegel.</string>
+    <string name="backup_error_kind_backup">Das ist ein einzelnes Profil, keine Sicherung. Importiere es im Tab Profile.</string>
+    <string name="backup_error_kind_profile">Das ist eine vollständige Sicherung, kein einzelnes Profil. Spiele sie in den Einstellungen ein.</string>
+    <string name="backup_error_newer">Diese Datei stammt aus einer neueren Pegel-Version. Aktualisiere zuerst die App.</string>
+    <string name="backup_error_read">Die Datei konnte nicht gelesen werden.</string>
+    <string name="profiles_share">Teilen</string>
+    <string name="profiles_share_title">Profil teilen</string>
+    <string name="profiles_import">Profil aus Datei importieren</string>
+    <string name="profiles_imported">Profil importiert.</string>
 </resources>

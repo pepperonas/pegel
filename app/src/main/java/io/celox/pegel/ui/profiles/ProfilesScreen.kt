@@ -1,10 +1,12 @@
 package io.celox.pegel.ui.profiles
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,7 +40,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,14 +68,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.celox.pegel.R
 import io.celox.pegel.container
 import io.celox.pegel.data.Profile
+import io.celox.pegel.data.readDocument
+import io.celox.pegel.data.shareProfileIntent
 import io.celox.pegel.device.DeviceKind
 import io.celox.pegel.device.DeviceWatcher
 import io.celox.pegel.ui.common.NameDialog
 import io.celox.pegel.ui.common.SectionCard
+import io.celox.pegel.ui.settings.backupErrorText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfilesScreen(extraActions: @Composable ColumnScope.(ProfilesViewModel) -> Unit = {}) {
+fun ProfilesScreen() {
     val context = LocalContext.current
     val watcher = remember { DeviceWatcher(context) }
     val vm: ProfilesViewModel = viewModel(factory = ProfilesViewModel.factory(context.container, watcher.active))
@@ -79,10 +91,41 @@ fun ProfilesScreen(extraActions: @Composable ColumnScope.(ProfilesViewModel) -> 
     var renaming by remember { mutableStateOf<Profile?>(null) }
     var deleting by remember { mutableStateOf<Profile?>(null) }
 
+    val repo = context.container.repository
+    val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
+    val imported = stringResource(R.string.profiles_imported)
+    val shareTitle = stringResource(R.string.profiles_share_title)
+    val openFailed = stringResource(R.string.open_failed)
+    var importFailure by remember { mutableStateOf<Throwable?>(null) }
+    var importFailed by remember { mutableStateOf(false) }
+
+    val pickProfile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val text = withContext(Dispatchers.IO) { readDocument(context, uri) }
+            val result = text?.let { repo.importProfile(it) }
+            if (result?.isSuccess == true) snackbar.showSnackbar(imported)
+            else { importFailure = result?.exceptionOrNull(); importFailed = true }
+        }
+    }
+    fun share(profile: Profile) {
+        scope.launch {
+            val text = repo.profileText(profile.id) ?: return@launch
+            try {
+                val send = withContext(Dispatchers.IO) { shareProfileIntent(context, profile.name, text) }
+                context.startActivity(Intent.createChooser(send, shareTitle))
+            } catch (_: Exception) {
+                snackbar.showSnackbar(openFailed)
+            }
+        }
+    }
+
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.profiles_title)) },
@@ -108,6 +151,7 @@ fun ProfilesScreen(extraActions: @Composable ColumnScope.(ProfilesViewModel) -> 
                     if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     ProfileItem(
                         row, onLoad = { vm.load(row.profile.id) },
+                        onShare = { share(row.profile) },
                         onRename = { renaming = row.profile }, onDelete = { deleting = row.profile },
                     )
                 }
@@ -116,7 +160,10 @@ fun ProfilesScreen(extraActions: @Composable ColumnScope.(ProfilesViewModel) -> 
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.profiles_save_new), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                extraActions(vm)
+                OutlinedButton(
+                    onClick = { pickProfile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.profiles_import), maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
 
             SectionCard(title = stringResource(R.string.devices_section), icon = Icons.Rounded.Devices, index = 1) {
@@ -141,6 +188,14 @@ fun ProfilesScreen(extraActions: @Composable ColumnScope.(ProfilesViewModel) -> 
         }
     }
 
+    if (importFailed) {
+        val message = backupErrorText(importFailure, expectingBackup = false)
+        AlertDialog(
+            onDismissRequest = { importFailed = false },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = { importFailed = false }) { Text(stringResource(android.R.string.ok)) } },
+        )
+    }
     if (askNew) {
         NameDialog(stringResource(R.string.profiles_new_title), onDismiss = { askNew = false }, onConfirm = { vm.saveAs(it) })
     }
@@ -182,7 +237,7 @@ private fun ChangedBanner(name: String, onSave: () -> Unit, onDiscard: () -> Uni
 }
 
 @Composable
-private fun ProfileItem(row: ProfileRow, onLoad: () -> Unit, onRename: () -> Unit, onDelete: () -> Unit) {
+private fun ProfileItem(row: ProfileRow, onLoad: () -> Unit, onShare: () -> Unit, onRename: () -> Unit, onDelete: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onLoad).padding(vertical = 8.dp),
@@ -211,6 +266,7 @@ private fun ProfileItem(row: ProfileRow, onLoad: () -> Unit, onRename: () -> Uni
                 Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.profiles_menu, row.profile.name))
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.profiles_share)) }, onClick = { menu = false; onShare() })
                 DropdownMenuItem(text = { Text(stringResource(R.string.profiles_rename)) }, onClick = { menu = false; onRename() })
                 DropdownMenuItem(text = { Text(stringResource(R.string.profiles_delete)) }, onClick = { menu = false; onDelete() })
             }

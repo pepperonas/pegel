@@ -1,5 +1,6 @@
 package io.celox.pegel.data
 
+import androidx.room.withTransaction
 import io.celox.pegel.audio.Preset
 import io.celox.pegel.audio.SoundState
 import io.celox.pegel.audio.SoundStateJson
@@ -145,6 +146,76 @@ class SoundRepository private constructor(
 
     suspend fun profileForDevice(key: String): Profile? =
         db.devices().byKey(key)?.profileId?.let { db.profiles().byId(it) }?.toProfile()
+
+    // ---- backup and sharing ----
+
+    suspend fun exportAll(): BackupData = lock.withLock {
+        val profiles = db.profiles().all().map { it.toProfile() }
+        val names = profiles.associate { it.id to it.name }
+        BackupData(
+            profiles = profiles.map { BackupProfile(it.name, it.state) },
+            presets = db.presets().all().map { it.toPreset() }.map { BackupPreset(it.name, it.gainsDb) },
+            devices = db.devices().all().map { BackupDevice(it.key, it.label, names[it.profileId]) },
+            settings = _settings.value,
+            working = _state.value,
+            activeProfile = _active.value?.name,
+        )
+    }
+
+    suspend fun backupText(): String = BackupCodec.encode(exportAll())
+
+    /**
+     * Replaces profiles, presets, devices, settings and the working sound with [d]. The master
+     * switch keeps its current position: reading a file must never switch Pegel on or off.
+     */
+    suspend fun importAll(d: BackupData) = lock.withLock {
+        val ids = LinkedHashMap<String, Long>() // lower-case name → new row id
+        val now = now()
+        db.withTransaction {
+            db.devices().clear(); db.presets().clear(); db.profiles().clear()
+            for (p in d.profiles) {
+                val name = cleanName(p.name) ?: continue
+                if (name.lowercase() in ids) continue // names are unique ignoring case: the first one wins
+                ids[name.lowercase()] = db.profiles().insert(ProfileEntity(name = name, stateJson = SoundStateJson.encode(p.state), updatedAt = now))
+            }
+            val presetNames = HashSet<String>()
+            for (p in d.presets) {
+                val name = cleanName(p.name) ?: continue
+                if (!presetNames.add(name.lowercase())) continue
+                val gains = SoundState(gainsDb = p.gainsDb).normalized().gainsDb
+                db.presets().insert(PresetEntity(name = name, gainsJson = JSONArray().also { a -> gains.forEach { a.put(it.toDouble()) } }.toString()))
+            }
+            for (dev in d.devices) {
+                db.devices().upsert(DeviceEntity(dev.key, dev.label, dev.profile?.let { ids[it.trim().lowercase()] }, now))
+            }
+        }
+        val settings = d.settings.normalized().copy(enabled = _settings.value.enabled)
+        _settings.value = settings
+        store.writeSettings(settings)
+        val active = d.activeProfile?.let { ids[it.trim().lowercase()] }?.let { db.profiles().byId(it) }?.toProfile()
+        setWorking(d.working.normalized(), active)
+    }
+
+    /** Reads a backup file's text and restores it; a file that is refused changes nothing. */
+    suspend fun restoreFrom(text: String): Result<Unit> = BackupCodec.decode(text).map { importAll(it) }
+
+    /** The shareable text of one profile, or null if it no longer exists. */
+    suspend fun profileText(id: Long): String? =
+        db.profiles().byId(id)?.toProfile()?.let { BackupCodec.encodeProfile(it.name, it.state) }
+
+    /** Adds the profile from a shared file under a free name; the current sound is left alone. */
+    suspend fun importProfile(text: String): Result<Long> = BackupCodec.decodeProfile(text).map { p ->
+        lock.withLock {
+            var name = p.name
+            var n = 2
+            while (db.profiles().byName(name) != null) {
+                val suffix = " ($n)"
+                name = p.name.take(NAME_MAX - suffix.length).trim() + suffix
+                n++
+            }
+            db.profiles().insert(ProfileEntity(name = name, stateJson = SoundStateJson.encode(p.state), updatedAt = now()))
+        }
+    }
 
     companion object {
         suspend fun create(db: PegelDatabase, store: SettingsStore): SoundRepository {

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Cable
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.DropdownMenu
@@ -77,7 +78,7 @@ val FRAME_CHOICES_MS = listOf(10, 20, 50, 100, 250, 500, 1000)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onOpenHelp: () -> Unit, backup: @Composable () -> Unit = {}) {
+fun SettingsScreen(onOpenHelp: () -> Unit) {
     val context = LocalContext.current
     val repo = context.container.repository
     val settings by repo.settings.collectAsStateWithLifecycle()
@@ -178,7 +179,9 @@ fun SettingsScreen(onOpenHelp: () -> Unit, backup: @Composable () -> Unit = {}) 
                 }
             }
 
-            backup()
+            SectionCard(stringResource(R.string.settings_backup), Icons.Rounded.Save, index = 4) {
+                BackupSection(notify = { message -> scope.launch { snackbar.showSnackbar(message) } })
+            }
 
             SectionCard(stringResource(R.string.settings_updates), Icons.Rounded.SystemUpdate, index = 5) {
                 UpdateSection(onOpenFailed = ::openFailed)

@@ -73,4 +73,16 @@ class ManifestTest {
         assertTrue(activity.contains("android.intent.category.DEFAULT"))
         assertTrue(activity.contains("android.intent.category.CATEGORY_CONTENT_MUSIC"))
     }
+
+    @Test
+    fun `shared profile files go through a private file provider`() {
+        val provider = Regex("""<provider\s+android:name="androidx\.core\.content\.FileProvider"[\s\S]*?</provider>""").find(manifest)!!.value
+        assertTrue(provider.contains("android:authorities=\"io.celox.pegel.files\""))
+        assertTrue(provider.contains("android:exported=\"false\""))
+        assertTrue(provider.contains("android:grantUriPermissions=\"true\""))
+        val paths = File(File("src/main/res").takeIf { it.exists() } ?: File("app/src/main/res"), "xml/file_paths.xml").readText()
+        // only the dedicated cache folder — never the whole cache, files or database directory
+        assertEquals(1, Regex("<(cache|files|external|root)[a-z-]*-path").findAll(paths).count())
+        assertTrue(paths.contains("""<cache-path name="shared" path="shared/" />"""))
+    }
 }
