@@ -1,0 +1,90 @@
+package io.celox.pegel
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Equalizer
+import androidx.compose.material.icons.rounded.LibraryMusic
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import io.celox.pegel.ui.theme.PegelTheme
+import io.celox.pegel.ui.theme.ThemeMode
+import io.celox.pegel.ui.theme.ThemeSettings
+
+/** The three top-level tabs. */
+enum class Destination(val route: String, @StringRes val label: Int, val icon: ImageVector) {
+    SOUND("sound", R.string.nav_sound, Icons.Rounded.Equalizer),
+    PROFILES("profiles", R.string.nav_profiles, Icons.Rounded.LibraryMusic),
+    SETTINGS("settings", R.string.nav_settings, Icons.Rounded.Settings),
+}
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            val mode by ThemeSettings.mode(this).collectAsStateWithLifecycle(ThemeMode.SYSTEM)
+            val dynamic by ThemeSettings.dynamicColor(this).collectAsStateWithLifecycle(false)
+            PegelTheme(mode = mode, dynamicColor = dynamic) { PegelRoot() }
+        }
+    }
+}
+
+@Composable
+fun PegelRoot() {
+    val nav = rememberNavController()
+    val current = nav.currentBackStackEntryAsState().value?.destination?.route
+    Scaffold(
+        bottomBar = {
+            // Sub-screens (help) hide the bar: it belongs to the three tabs only.
+            if (current == null || Destination.entries.any { it.route == current }) {
+                ShortNavigationBar {
+                    Destination.entries.forEach { d ->
+                        ShortNavigationBarItem(
+                            selected = current == d.route,
+                            onClick = {
+                                nav.navigate(d.route) {
+                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(d.icon, contentDescription = null) },
+                            label = { Text(stringResource(d.label)) },
+                        )
+                    }
+                }
+            }
+        }
+    ) { padding ->
+        NavHost(nav, startDestination = Destination.SOUND.route, modifier = Modifier.padding(padding)) {
+            Destination.entries.forEach { d ->
+                composable(d.route) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(d.label)) }
+                }
+            }
+        }
+    }
+}

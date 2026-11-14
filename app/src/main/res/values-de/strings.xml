@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_sound">Klang</string>
+    <string name="nav_profiles">Profile</string>
+    <string name="nav_settings">Einstellungen</string>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <color name="window_background">#F8FAF0</color>
+    <color name="brand_graphite">#11140E</color>
+    <color name="brand_signal">#A0D57B</color>
+    <color name="brand_peak">#F5BF48</color>
+</resources>

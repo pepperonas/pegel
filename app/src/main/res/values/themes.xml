@@ -1,0 +1,6 @@
+<resources>
+    <!-- Launch theme; the night-qualified copy avoids a white flash before Compose draws. -->
+    <style name="Theme.Pegel" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>
