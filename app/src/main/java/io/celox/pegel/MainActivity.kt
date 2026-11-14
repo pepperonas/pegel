@@ -33,6 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.celox.pegel.service.ServiceStarter
 import io.celox.pegel.service.handleSessionIntent
+import io.celox.pegel.ui.profiles.ProfilesScreen
 import io.celox.pegel.ui.sound.SoundScreen
 import io.celox.pegel.ui.theme.PegelTheme
 import io.celox.pegel.ui.theme.ThemeMode
@@ -101,7 +102,7 @@ fun PegelRoot() {
     ) { padding ->
         NavHost(nav, startDestination = Destination.SOUND.route, modifier = Modifier.padding(padding)) {
             composable(Destination.SOUND.route) { SoundScreen(onOpenProfiles = { go(Destination.PROFILES) }) }
-            composable(Destination.PROFILES.route) { Placeholder(Destination.PROFILES) }
+            composable(Destination.PROFILES.route) { ProfilesScreen() }
             composable(Destination.SETTINGS.route) { Placeholder(Destination.SETTINGS) }
         }
     }
