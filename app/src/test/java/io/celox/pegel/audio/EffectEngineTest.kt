@@ -199,4 +199,19 @@ class EffectEngineTest {
         assertTrue(engine.state.value.failed)
         assertEquals(Target.None, engine.state.value.target)
     }
+
+    @Test
+    fun `a lost global mix is not grabbed back until the user acts`() {
+        engine.setEnabled(true)
+        factory.liveOn(GLOBAL_SESSION).onControlLost!!.invoke()
+        // nothing prevents re-creating it — the engine must choose not to
+        assertTrue(factory.live.isEmpty())
+        assertTrue(engine.state.value.failed)
+        engine.setPlan(other)
+        assertTrue("a slider move is not a reason to fight for the session", factory.live.isEmpty())
+
+        engine.setEnabled(true)
+        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
+        assertFalse(engine.state.value.failed)
+    }
 }

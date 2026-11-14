@@ -45,4 +45,4 @@ fun planFor(state: SoundState, tuning: Tuning): ChainPlan {
 
 /** Linear in amplitude: halfway to one side halves the other side (-6 dB). */
 private fun attenuation(amount: Float): Float =
-    if (amount >= 1f) BALANCE_FLOOR_DB else (20 * log10(1f - amount)).coerceAtLeast(BALANCE_FLOOR_DB)
+    (20 * log10(1f - amount)).coerceAtLeast(BALANCE_FLOOR_DB) // log10(0) is -infinity, hence the floor

@@ -21,14 +21,15 @@ fun curveSamples(gainsDb: List<Float>, samples: Int): List<Float> {
     val m = FloatArray(n)
     m[0] = d[0]
     m[n - 1] = d[n - 2]
-    for (i in 1 until n - 1) m[i] = if (d[i - 1] * d[i] <= 0f) 0f else (d[i - 1] + d[i]) / 2f
+    for (i in 1 until n - 1) m[i] = (d[i - 1] + d[i]) / 2f
     // Limit the tangents so no segment overshoots its end points.
     for (i in 0 until n - 1) {
         if (d[i] == 0f) { m[i] = 0f; m[i + 1] = 0f; continue }
         val limit = 3f * abs(d[i])
         if (abs(m[i]) > limit) m[i] = if (m[i] > 0) limit else -limit
         if (abs(m[i + 1]) > limit) m[i + 1] = if (m[i + 1] > 0) limit else -limit
-        // A tangent pointing against the segment would create a bump.
+        // A tangent pointing against the segment would create a bump (this also flattens the
+        // curve at every peak and dip, where the neighbouring slopes disagree).
         if (m[i] * d[i] < 0f) m[i] = 0f
         if (m[i + 1] * d[i] < 0f) m[i + 1] = 0f
     }
