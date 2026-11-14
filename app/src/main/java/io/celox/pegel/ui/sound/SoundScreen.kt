@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -263,7 +264,9 @@ private fun PresetSheet(
             stringResource(R.string.presets_title), style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
         )
-        LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
+        // The sheet draws edge to edge, and on older Android its window reports no insets at all:
+        // generous bottom padding keeps the last preset clear of the navigation bar either way.
+        LazyColumn(Modifier.navigationBarsPadding(), contentPadding = PaddingValues(bottom = 72.dp)) {
             items(presets, key = { it.id }) { preset ->
                 val label = presetLabel(preset)
                 ListItem(

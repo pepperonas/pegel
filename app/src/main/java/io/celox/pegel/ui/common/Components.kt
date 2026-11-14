@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,17 +22,23 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.celox.pegel.R
@@ -107,6 +115,10 @@ fun NameDialog(title: String, initial: String = "", onDismiss: () -> Unit, onCon
     var text by rememberSaveable { mutableStateOf(initial) }
     var error by rememberSaveable { mutableStateOf<NameError?>(null) }
     val scope = rememberCoroutineScope()
+    // The dialog exists to type a name: the field has the cursor and the keyboard is up at once.
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focus.requestFocus() }
+    fun submit() { scope.launch { error = onConfirm(text); if (error == null) onDismiss() } }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -116,14 +128,16 @@ fun NameDialog(title: String, initial: String = "", onDismiss: () -> Unit, onCon
                 onValueChange = { text = it.take(NAME_MAX); error = null },
                 label = { Text(stringResource(R.string.dialog_name_label)) },
                 singleLine = true,
+                modifier = Modifier.focusRequester(focus),
+                // "Done" on the keyboard (or Enter) saves — no reaching for the button.
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { submit() }),
                 isError = error != null,
                 supportingText = nameErrorText(error)?.let { { Text(it) } },
             )
         },
         confirmButton = {
-            TextButton(onClick = {
-                scope.launch { error = onConfirm(text); if (error == null) onDismiss() }
-            }) { Text(stringResource(R.string.dialog_save)) }
+            TextButton(onClick = ::submit) { Text(stringResource(R.string.dialog_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) } },
     )

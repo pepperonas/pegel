@@ -1,0 +1,34 @@
+# Changelog
+
+All notable changes to Pegel. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow
+[Semantic Versioning](https://semver.org/).
+
+## [1.0.0] - 2026-11-14
+
+First release.
+
+### Added
+
+- **Equalizer** with ten bands from 31 Hz to 16 kHz, ±12 dB in half-decibel steps, a curve above
+  the sliders, 13 built-in presets and your own presets.
+- **Bass boost**, **loudness** and **virtualizer**, each with a switch and a strength. The bass
+  cutoff (10–150 Hz) and what "100 %" means (5–30 dB) are ordinary settings.
+- **Reverb** and **left/right balance** as optional cards.
+- **Profiles**: save the whole sound under a name, load it, see when it was changed, save or
+  discard the changes.
+- **Automatic per device**: bind a profile to the speaker, wired or USB headphones, or a Bluetooth
+  device — Pegel applies it when that output becomes active.
+- **Connection modes**: follow players that announce their audio, use the global mix, or both
+  (automatic). Pegel registers as the system equalizer, so a player's "Equalizer" button opens it.
+- A **master switch** with a foreground service, a notification that says what Pegel is attached to,
+  and a restart after reboot.
+- **Backup and restore** of all profiles, presets and settings as one JSON file; single profiles can
+  be shared as `.pegel` files.
+- A **help page** that explains why an equalizer works with some apps and not with others, and what
+  to try.
+- Material 3 Expressive design, light and dark, optional Material You colours, English and German.
+- An opt-in **update check** against GitHub Releases — off by default, and the only thing in the
+  app that goes online.
+
+No ads, no tracking, no account, no paywall.
