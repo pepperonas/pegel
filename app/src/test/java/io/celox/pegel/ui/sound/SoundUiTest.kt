@@ -61,6 +61,14 @@ class SoundUiTest {
     }
 
     @Test
+    fun `a status left over from the last run locks nothing while Pegel is off`() {
+        val stale = EngineState(Target.None, ChainStatus(dynamics = false, virtualizer = false, reverb = false), failed = false)
+        val u = ui(settings = Settings(enabled = false), engine = stale)
+        assertNull(u.notice)
+        assertTrue(u.virtualizerAvailable && u.reverbAvailable)
+    }
+
+    @Test
     fun `blocked notifications are mentioned only when nothing worse is going on`() {
         assertEquals(Notice.NOTIFICATIONS_OFF, ui(notifications = false).notice)
         assertEquals(
