@@ -39,4 +39,38 @@ class ManifestTest {
     fun `the per-app language setting is wired up`() {
         assertTrue(manifest.contains("android:localeConfig=\"@xml/locales_config\""))
     }
+
+    @Test
+    fun `the service is a special-use foreground service with its subtype declared`() {
+        val service = Regex("""<service[\s\S]*?</service>""").find(manifest)!!.value
+        assertTrue(service.contains("android:name=\".service.PegelService\""))
+        assertTrue(service.contains("android:foregroundServiceType=\"specialUse\""))
+        assertTrue(service.contains("android:exported=\"false\""))
+        assertTrue(
+            Regex("""android:name="android\.app\.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"\s+android:value="equalizer"""")
+                .containsMatchIn(service)
+        )
+    }
+
+    @Test
+    fun `players can reach the session receiver`() {
+        val receiver = Regex("""<receiver\s+android:name="\.service\.SessionReceiver"[\s\S]*?</receiver>""").find(manifest)!!.value
+        assertTrue(receiver.contains("android:exported=\"true\""))
+        assertTrue(receiver.contains("android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION"))
+        assertTrue(receiver.contains("android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION"))
+    }
+
+    @Test
+    fun `Pegel starts again after a reboot`() {
+        val receiver = Regex("""<receiver\s+android:name="\.service\.BootReceiver"[\s\S]*?</receiver>""").find(manifest)!!.value
+        assertTrue(receiver.contains("android.intent.action.BOOT_COMPLETED"))
+    }
+
+    @Test
+    fun `Pegel registers as the system equalizer panel`() {
+        val activity = Regex("""<activity[\s\S]*?</activity>""").find(manifest)!!.value
+        assertTrue(activity.contains("android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL"))
+        assertTrue(activity.contains("android.intent.category.DEFAULT"))
+        assertTrue(activity.contains("android.intent.category.CATEGORY_CONTENT_MUSIC"))
+    }
 }

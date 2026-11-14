@@ -3,4 +3,19 @@
     <string name="nav_sound">Klang</string>
     <string name="nav_profiles">Profile</string>
     <string name="nav_settings">Einstellungen</string>
+    <string name="notif_channel_status">Status</string>
+    <string name="notif_channel_attention">Braucht Aufmerksamkeit</string>
+    <string name="notif_starting">Startet …</string>
+    <string name="notif_action_off">Ausschalten</string>
+    <string name="notif_applied_title">Profil „%1$s“ angewendet</string>
+    <string name="notif_applied_text">%1$s verbunden</string>
+    <string name="notif_attention_title">Tippen, um Pegel zu aktivieren</string>
+    <string name="notif_attention_text">Android hat den Start im Hintergrund nicht erlaubt.</string>
+    <string name="target_global">Globaler Mix</string>
+    <string name="target_waiting">Wartet auf einen Player</string>
+    <string name="target_failed">Nicht verbunden</string>
+    <string name="profile_unsaved">Ungespeichert</string>
+    <string name="profile_modified">%1$s (geändert)</string>
+    <string name="device_speaker">Lautsprecher</string>
+    <string name="device_unnamed">Unbenanntes Gerät</string>
 </resources>

@@ -1,5 +1,6 @@
 package io.celox.pegel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +30,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import io.celox.pegel.service.ServiceStarter
+import io.celox.pegel.service.handleSessionIntent
 import io.celox.pegel.ui.theme.PegelTheme
 import io.celox.pegel.ui.theme.ThemeMode
 import io.celox.pegel.ui.theme.ThemeSettings
@@ -49,6 +52,20 @@ class MainActivity : ComponentActivity() {
             val dynamic by ThemeSettings.dynamicColor(this).collectAsStateWithLifecycle(false)
             PegelTheme(mode = mode, dynamicColor = dynamic) { PegelRoot() }
         }
+        handleSessionIntent(this, intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // A player's "Equalizer" button hands over its audio session.
+        handleSessionIntent(this, intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // In the foreground a start is always allowed — this is what the "tap to activate"
+        // notification leads to, and it revives the service if the system killed it.
+        if (container.repository.settings.value.enabled) ServiceStarter.sync(this, enabled = true)
     }
 }
 
