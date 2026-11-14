@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 /** Glue only: the decisions live in [buildSoundUi] and [SoundActions]. */
 class SoundViewModel(container: AppContainer, private val syncService: (Boolean) -> Unit) : ViewModel() {
     private val repo = container.repository
+    private val engine = container.engine
     private val actions = SoundActions(repo)
     private val notificationsAllowed = MutableStateFlow(true)
 
@@ -43,6 +44,9 @@ class SoundViewModel(container: AppContainer, private val syncService: (Boolean)
             syncService(enabled)
         }
     }
+
+    /** Back to the global mix when a player is gone without having said so. */
+    fun detachPlayers() = engine.forgetPlayers()
 
     fun setGain(band: Int, db: Float) { viewModelScope.launch { actions.setGain(band, db) } }
     fun selectPreset(id: String) { viewModelScope.launch { actions.selectPreset(id) } }

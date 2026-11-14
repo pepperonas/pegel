@@ -23,6 +23,14 @@ fun parseSessionIntent(intent: Intent): SessionEvent? {
     return SessionEvent(open, session, intent.getStringExtra(AudioEffect.EXTRA_PACKAGE_NAME) ?: "?")
 }
 
+/**
+ * Whether an activity should act on the intent it was started with. A recreated activity (rotation,
+ * theme change) and one brought back from recents both still carry the original intent — replaying
+ * a player's "Equalizer" intent then would re-open a session that player closed long ago.
+ */
+fun isFreshLaunch(restored: Boolean, flags: Int): Boolean =
+    !restored && flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0
+
 /** Routes a session announcement to the engine and makes sure the service is up if Pegel is on. */
 fun handleSessionIntent(context: Context, intent: Intent) {
     val event = parseSessionIntent(intent) ?: return

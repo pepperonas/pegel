@@ -30,6 +30,10 @@ class ManifestTest {
                 "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
                 // Only for the opt-in update check (off by default).
                 "android.permission.INTERNET",
+                // WorkManager (the update check's scheduler) brings these two; declared in our own
+                // manifest so this list — and the README — show what the APK really requests.
+                "android.permission.ACCESS_NETWORK_STATE",
+                "android.permission.WAKE_LOCK",
             ),
             permissions
         )
@@ -64,6 +68,12 @@ class ManifestTest {
     fun `Pegel starts again after a reboot`() {
         val receiver = Regex("""<receiver\s+android:name="\.service\.BootReceiver"[\s\S]*?</receiver>""").find(manifest)!!.value
         assertTrue(receiver.contains("android.intent.action.BOOT_COMPLETED"))
+    }
+
+    @Test
+    fun `Pegel starts again after it was updated`() {
+        val receiver = Regex("""<receiver\s+android:name="\.service\.BootReceiver"[\s\S]*?</receiver>""").find(manifest)!!.value
+        assertTrue(receiver.contains("android.intent.action.MY_PACKAGE_REPLACED"))
     }
 
     @Test

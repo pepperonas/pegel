@@ -124,7 +124,7 @@ fun SoundScreen(onOpenProfiles: () -> Unit) {
                 .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (ui.enabled) StatusRow(ui, onOpenProfiles) else OffHint()
+            if (ui.enabled) StatusRow(ui, onOpenProfiles, onDetach = vm::detachPlayers) else OffHint()
             ui.notice?.let { NoticeBanner(it, onAllowNotifications = ::requestNotifications) }
 
             val s = ui.state
@@ -189,7 +189,7 @@ fun SoundScreen(onOpenProfiles: () -> Unit) {
 
 /** Where Pegel is attached and which profile is playing — tapping leads to the profiles. */
 @Composable
-private fun StatusRow(ui: SoundUi, onOpenProfiles: () -> Unit) {
+private fun StatusRow(ui: SoundUi, onOpenProfiles: () -> Unit, onDetach: () -> Unit) {
     val context = LocalContext.current
     val target = when (val t = ui.target) {
         Target.GlobalMix -> stringResource(R.string.target_global)
@@ -210,6 +210,10 @@ private fun StatusRow(ui: SoundUi, onOpenProfiles: () -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text(target, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(profile, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            // A killed player never closes its session and Android does not report it: the way out.
+            if (ui.target is Target.Players) {
+                TextButton(onClick = onDetach) { Text(stringResource(R.string.sound_detach)) }
             }
         }
     }

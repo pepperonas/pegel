@@ -83,4 +83,21 @@ class AutoApplyTest {
         assertNull(auto.onActiveDevice(null))
         assertEquals(emptyList<Any>(), repo.devices.first())
     }
+
+    // Reviewer finding: the "same device" memory lived in an object the service re-created, so
+    // switching Pegel off and on (or a reboot) reloaded the bound profile over unsaved changes.
+    @Test
+    fun `a restart on the same device does not undo unsaved changes`() = runBlocking {
+        val loud = profile("Loud", 6f)
+        repo.bindDevice(buds.key, loud)
+        auto.onActiveDevice(buds)
+        repo.update { it.withGain(0, 2f) }
+
+        val afterRestart = fx.repository()
+        assertNull(AutoApply(afterRestart).onActiveDevice(buds))
+        assertEquals(2f, afterRestart.state.value.gainsDb[0])
+        // a different device still gets its profile
+        afterRestart.bindDevice(speaker.key, loud)
+        assertEquals("Loud", AutoApply(afterRestart).onActiveDevice(speaker)!!.name)
+    }
 }

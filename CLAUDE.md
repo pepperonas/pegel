@@ -72,8 +72,9 @@ UI (Compose) ──update()──▶ SoundRepository ──state/settings──�
      `FakeEffectChain`.
    - **`AndroidEffectChain` is the only file that may touch `android.media.audiofx`**, and every call
      in it is guarded: effects can throw at any time (unsupported, session gone, another app took
-     control). One `DynamicsProcessing` carries EQ (post-EQ, 10 bands), bass (pre-EQ band 0), loudness
-     (limiter post gain) and balance (input gain per channel); `Virtualizer` and `PresetReverb` sit
+     control). One `DynamicsProcessing` carries EQ (post-EQ, 10 bands), bass (pre-EQ band 0), and
+     balance plus loudness as input gain per channel, in front of the limiter (gain *behind* a limiter
+     clips — `inputGainsDb`, `LIMITER_POST_GAIN_DB`); `Virtualizer` and `PresetReverb` sit
      next to it.
 2. **`data/`** — Room (`profiles`, `presets`, `devices`; deleting a profile sets bound devices to
    NULL), DataStore for settings and the sound being edited, and `SoundRepository` on top. Its
@@ -96,11 +97,27 @@ UI (Compose) ──update()──▶ SoundRepository ──state/settings──�
   starts the service again. Do not call `startForegroundService` anywhere else.
 - **A lost global mix is not grabbed back** until the user does something — two equalizers taking
   session 0 from each other would never settle (`EffectEngine.globalLost`, pinned by a test).
+  `setEnabled(true)` while already on is *not* such an event: the service re-asserts it on every
+  state change.
+- **Android never reports a dead session.** A player that is killed without closing its session keeps
+  Pegel attached to nothing; `EffectEngine.forgetPlayers()` ("Detach" in the status row) is the way
+  out. Do not assume `apply()` throws on a dead session — it does not.
+- **The slider path does not wait for the disk.** `SoundRepository.update` changes the flows at once
+  and leaves storing to one conflated writer that always writes the latest state; profile operations
+  wait. Tests that simulate a restart call `flush()` first (RepoFixture does).
+- **The drift guards read files outside the classpath** (READMEs, changelogs, workflows, manifest).
+  They are declared as inputs of the test task in `app/build.gradle.kts`; without that Gradle calls
+  the tests up to date and the guards silently do not run.
+- **A red baseline makes a mutation check worthless.** The badge guard fails whenever the test count
+  changes; run `scripts/update-badges.py` and see green before mutating, and list *which* test failed.
 - **No reverb on the global mix.** There it is an auxiliary effect and would be a switch that does
   nothing, so the chain reports it unavailable and the card says why.
 - **The update switch lives in `UpdateCheckStore`**, not in `Settings` — the worker reads it
   synchronously, and consent does not belong in a backup file.
 - **A restore never changes the master switch.** Reading a file must not start a service.
+- **`startForeground` is wrapped** (`ServiceStarter.promote`): Android 12+ can refuse it on a sticky
+  restart in the background. And the activity acts on its launch intent only once (`isFreshLaunch`),
+  not on every rotation.
 - **Launcher layers must be vector drawables.** The About section paints them with `painterResource`;
   a `<shape>` crashed Settings once (`LauncherIconTest`).
 - **Strings:** English in `res/values/`, German in `res/values-de/`, same keys and placeholders

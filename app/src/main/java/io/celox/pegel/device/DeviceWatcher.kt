@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.os.Build
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -15,7 +16,7 @@ class DeviceWatcher(context: Context) {
 
     fun current(): OutputDevice? = pickActive(
         audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).mapNotNull { info ->
-            kindOf(info.type)?.let { OutputDevice(it, info.productName?.toString().orEmpty()) }
+            kindOf(info.type)?.let { OutputDevice(it, deviceName(info.productName, Build.MODEL)) }
         }
     )
 

@@ -8,11 +8,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag/version to build (e.g. v1.0.0)'
-        required: true
 
 permissions:
   contents: write
@@ -35,16 +30,12 @@ jobs:
       # 'tools' package, which sdkmanager 16.0 rejects.
 
       - name: Gradle cache
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
 
       - name: Resolve version
         id: ver
-        env:
-          # Pass untrusted dispatch input through env (never inline into
-          # the shell) and validate it before using it downstream.
-          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          NAME="${GITHUB_REF_NAME:-$INPUT_TAG}"
+          NAME="$GITHUB_REF_NAME"
           if ! printf '%s' "$NAME" | grep -Eq '^v[0-9A-Za-z._+-]+$'; then
             echo "Invalid version/tag: '$NAME' (expected like v1.2.3)" >&2
             exit 1
@@ -73,6 +64,11 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
 
+      # Remove the key as soon as the APK is signed — before any third-party action runs.
+      - name: Clean up keystore
+        if: always()
+        run: rm -f release.jks
+
       - name: Stage APK
         run: |
           cp app/build/outputs/apk/release/app-release.apk \
@@ -89,7 +85,7 @@ jobs:
             || { echo "Unexpected signing certificate" >&2; exit 1; }
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           tag_name: ${{ steps.ver.outputs.name }}
           name: Pegel ${{ steps.ver.outputs.name }}
@@ -99,7 +95,3 @@ jobs:
           files: |
             pegel-${{ steps.ver.outputs.name }}.apk
             SHA256SUMS.txt
-
-      - name: Clean up keystore
-        if: always()
-        run: rm -f release.jks

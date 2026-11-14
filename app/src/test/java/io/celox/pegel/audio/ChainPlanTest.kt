@@ -45,8 +45,20 @@ class ChainPlanTest {
 
     @Test
     fun `loudness is strength times its maximum`() {
-        assertEquals(6f, planFor(SoundState(loudnessOn = true, loudnessStrength = 0.3f), tuning).limiterPostGainDb, 0.001f)
-        assertEquals(0f, planFor(SoundState(loudnessOn = false, loudnessStrength = 0.3f), tuning).limiterPostGainDb)
+        assertEquals(6f, planFor(SoundState(loudnessOn = true, loudnessStrength = 0.3f), tuning).loudnessGainDb, 0.001f)
+        assertEquals(0f, planFor(SoundState(loudnessOn = false, loudnessStrength = 0.3f), tuning).loudnessGainDb)
+    }
+
+    // Gain added behind a limiter clips; gain in front of it is what the limiter is there to catch.
+    @Test
+    fun `loudness is applied in front of the limiter, on top of the balance`() {
+        val plan = planFor(SoundState(loudnessOn = true, loudnessStrength = 0.5f, balance = 0.5f), tuning)
+        val (left, right) = inputGainsDb(plan)
+        assertEquals(10f + 20 * log10(0.5f), left, 0.001f)
+        assertEquals(10f, right, 0.001f)
+        assertEquals(0f, LIMITER_POST_GAIN_DB)
+        val quiet = inputGainsDb(planFor(SoundState(), tuning))
+        assertEquals(0f, quiet.first); assertEquals(0f, quiet.second)
     }
 
     @Test

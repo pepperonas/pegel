@@ -121,7 +121,7 @@
     <string name="settings_mode_players">Players only</string>
     <string name="settings_mode_players_hint">Leaves everything alone that does not announce itself – games, videos, calls.</string>
     <string name="settings_frame">Block size</string>
-    <string name="settings_frame_hint">Longer blocks distort less on heavy boosts but delay the sound.</string>
+    <string name="settings_frame_hint">Longer blocks distort less on heavy boosts and separate the lowest bands better, but delay the sound.</string>
     <string name="settings_operation">Running</string>
     <string name="settings_boot">Start after reboot</string>
     <string name="settings_boot_hint">Only when Pegel was on before.</string>
@@ -197,4 +197,7 @@
     <string name="profiles_share_title">Share profile</string>
     <string name="profiles_import">Import profile from file</string>
     <string name="profiles_imported">Profile imported.</string>
+    <string name="sound_detach">Detach</string>
+    <string name="help_stuck_title">Pegel still names a player that is closed</string>
+    <string name="help_stuck_text">A player that is closed by force never tells Pegel that it stopped, and Android does not report it either. Pegel then stays attached to nothing. Tap “Detach” in the line at the top of the Sound tab to return to the global mix; the player is followed again the next time it announces itself.</string>
 </resources>

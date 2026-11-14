@@ -42,11 +42,19 @@ class PegelService : LifecycleService() {
         val engine = container.engine
 
         Notifications.ensureChannels(this)
-        ServiceCompat.startForeground(
-            this, Notifications.ID_STATUS,
-            Notifications.status(this, getString(R.string.app_name), getString(R.string.notif_starting)),
-            if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
-        )
+        val promoted = ServiceStarter.promote(this) {
+            ServiceCompat.startForeground(
+                this, Notifications.ID_STATUS,
+                Notifications.status(this, getString(R.string.app_name), getString(R.string.notif_starting)),
+                if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
+            )
+        }
+        if (!promoted) {
+            // No foreground, no effects: the "tap to activate" notification is up, opening the app
+            // starts the service again from the foreground.
+            stopSelf()
+            return
+        }
 
         // Players that broadcast without a target only reach a receiver registered at runtime.
         ContextCompat.registerReceiver(

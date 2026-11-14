@@ -20,7 +20,8 @@ data class ChainPlan(
     val postEqGainsDb: List<Float>,
     val bassCutoffHz: Float,
     val bassGainDb: Float,
-    val limiterPostGainDb: Float,
+    /** Loudness: gain pushed *into* the limiter (see [inputGainsDb]). */
+    val loudnessGainDb: Float,
     val leftGainDb: Float,
     val rightGainDb: Float,
     /** 0..1000, or null when the virtualizer is off. */
@@ -35,13 +36,23 @@ fun planFor(state: SoundState, tuning: Tuning): ChainPlan {
         postEqGainsDb = if (s.eqOn) s.gainsDb else List(BAND_COUNT) { 0f },
         bassCutoffHz = t.bassCutoffHz.toFloat(),
         bassGainDb = if (s.bassOn) s.bassStrength * t.bassMaxDb else 0f,
-        limiterPostGainDb = if (s.loudnessOn) s.loudnessStrength * t.loudnessMaxDb else 0f,
+        loudnessGainDb = if (s.loudnessOn) s.loudnessStrength * t.loudnessMaxDb else 0f,
         leftGainDb = if (s.balance > 0f) attenuation(s.balance) else 0f,
         rightGainDb = if (s.balance < 0f) attenuation(-s.balance) else 0f,
         virtualizerStrength = if (s.virtualizerOn) (s.virtualizerStrength * 1000).roundToInt() else null,
         reverb = s.reverb,
     )
 }
+
+/**
+ * Nothing is added behind the limiter: gain there would clip. Loudness raises the level in front
+ * of it instead, which is exactly what the limiter is there to catch.
+ */
+const val LIMITER_POST_GAIN_DB = 0f
+
+/** Input gain per channel (left, right): balance attenuation plus the loudness gain. */
+fun inputGainsDb(plan: ChainPlan): Pair<Float, Float> =
+    (plan.leftGainDb + plan.loudnessGainDb) to (plan.rightGainDb + plan.loudnessGainDb)
 
 /** Linear in amplitude: halfway to one side halves the other side (-6 dB). */
 private fun attenuation(amount: Float): Float =

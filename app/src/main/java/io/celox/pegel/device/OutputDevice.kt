@@ -38,6 +38,15 @@ fun kindOf(audioDeviceInfoType: Int): DeviceKind? = when (audioDeviceInfoType) {
     else -> DeviceKind.OTHER
 }
 
+/**
+ * A port's name for the user. Built-in and unnamed ports report the phone's own model as their
+ * product name — "Pixel 7 connected" for a pair of wired headphones helps nobody.
+ */
+fun deviceName(productName: CharSequence?, model: String): String {
+    val name = productName?.toString()?.trim().orEmpty()
+    return if (name.equals(model.trim(), ignoreCase = true)) "" else name
+}
+
 private val PRIORITY = listOf(DeviceKind.BLUETOOTH, DeviceKind.USB, DeviceKind.WIRED, DeviceKind.SPEAKER, DeviceKind.OTHER)
 
 /**

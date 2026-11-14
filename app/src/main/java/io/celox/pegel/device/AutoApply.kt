@@ -9,13 +9,14 @@ import io.celox.pegel.data.SoundRepository
  * user adjusted in the meantime.
  */
 class AutoApply(private val repo: SoundRepository) {
-    private var lastKey: String? = null
 
     /** The profile that was applied, or null when nothing happened. */
     suspend fun onActiveDevice(device: OutputDevice?): Profile? {
         device ?: return null
-        if (device.key == lastKey) return null
-        lastKey = device.key
+        // Remembered in the repository, not here: this object dies with the service, and a restart
+        // on the same output must not reload the profile over what the user changed since.
+        if (device.key == repo.lastDeviceKey) return null
+        repo.rememberDevice(device.key)
         repo.seeDevice(device.key, device.name.trim())
         val profile = repo.profileForDevice(device.key) ?: return null
         repo.loadProfile(profile.id)

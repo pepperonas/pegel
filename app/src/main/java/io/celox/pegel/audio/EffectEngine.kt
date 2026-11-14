@@ -3,6 +3,9 @@ package io.celox.pegel.audio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/** More simultaneous player sessions than any real setup has; older ones are dropped. */
+const val MAX_PLAYER_SESSIONS = 8
+
 /** Where Pegel attaches its effects. */
 enum class SessionMode {
     /** Players that announce their session; the global mix while none does. */
@@ -47,8 +50,29 @@ class EffectEngine(private val factory: EffectChainFactory) {
      */
     private var globalLost = false
 
+    /**
+     * The master switch. Saying "on" again while it is on is *not* a deliberate event — the
+     * service re-asserts it on every state change — so it only retries when nothing is attached
+     * (another equalizer may have let go) and never clears [globalLost].
+     */
     @Synchronized fun setEnabled(enabled: Boolean) {
+        if (this.enabled == enabled) {
+            if (enabled && chains.isEmpty() && !globalLost) reconcile()
+            return
+        }
         this.enabled = enabled
+        globalLost = false
+        reconcile()
+    }
+
+    /**
+     * Drops every announced player. Android does not tell an effect that its session died, so a
+     * player that was killed without closing its session would keep Pegel attached to nothing —
+     * this is the user's way back to the global mix.
+     */
+    @Synchronized fun forgetPlayers() {
+        if (players.isEmpty()) return
+        players.clear()
         globalLost = false
         reconcile()
     }
@@ -70,6 +94,8 @@ class EffectEngine(private val factory: EffectChainFactory) {
     @Synchronized fun onSessionOpened(sessionId: Int, packageName: String) {
         if (sessionId <= GLOBAL_SESSION) return
         if (players.put(sessionId, packageName) == packageName && chains.containsKey(sessionId)) return
+        // The announcement is an open broadcast: keep the newest few, so no app can grow this forever.
+        while (players.size > MAX_PLAYER_SESSIONS) players.remove(players.keys.first())
         globalLost = false
         reconcile()
     }

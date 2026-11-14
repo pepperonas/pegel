@@ -8,6 +8,22 @@ enum class StartResult { STARTED, STOPPED, DENIED_NOTIFIED }
 
 object ServiceStarter {
     /**
+     * Runs the service's own `startForeground`. Android 12+ can refuse that too (a sticky restart
+     * while the app is in the background); then the user is told and the caller stops the service
+     * instead of crashing the process.
+     */
+    fun promote(context: Context, startForeground: () -> Unit): Boolean = try {
+        startForeground()
+        true
+    } catch (e: IllegalStateException) { // ForegroundServiceStartNotAllowedException
+        Notifications.postAttention(context)
+        false
+    } catch (e: SecurityException) {
+        Notifications.postAttention(context)
+        false
+    }
+
+    /**
      * Brings the service in line with the master switch. Android 12+ may refuse to start a
      * foreground service while the app is in the background (a session broadcast is no exemption);
      * then the user gets a notification to tap instead of a crash.

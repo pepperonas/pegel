@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.celox.pegel.service.ServiceStarter
 import io.celox.pegel.service.handleSessionIntent
+import io.celox.pegel.service.isFreshLaunch
 import io.celox.pegel.ui.profiles.ProfilesScreen
 import io.celox.pegel.ui.settings.HelpScreen
 import io.celox.pegel.ui.settings.SettingsScreen
@@ -54,13 +57,19 @@ class MainActivity : ComponentActivity() {
             val dynamic by ThemeSettings.dynamicColor(this).collectAsStateWithLifecycle(false)
             PegelTheme(mode = mode, dynamicColor = dynamic) { PegelRoot() }
         }
-        handleSessionIntent(this, intent)
+        if (isFreshLaunch(restored = savedInstanceState != null, flags = intent.flags)) handleSessionIntent(this, intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // A player's "Equalizer" button hands over its audio session.
         handleSessionIntent(this, intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Leaving the app: make sure the last slider move is on disk.
+        lifecycleScope.launch { container.repository.flush() }
     }
 
     override fun onStart() {

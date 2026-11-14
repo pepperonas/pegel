@@ -24,7 +24,12 @@ class RepoFixture {
     private fun newScope() = CoroutineScope(SupervisorJob() + Dispatchers.Default).also { scopes += it }
 
     /** A fresh repository on the same database and settings file — what a process restart sees. */
-    fun repository(): SoundRepository = runBlocking { SoundRepository.create(db, store) }
+    private val repos = mutableListOf<SoundRepository>()
+
+    fun repository(): SoundRepository = runBlocking {
+        repos.forEach { it.flush() } // what a clean stop does before the next start
+        SoundRepository.create(db, store).also { repos += it }
+    }
 
     fun close() {
         scopes.forEach { it.cancel() }

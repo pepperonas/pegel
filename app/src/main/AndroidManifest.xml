@@ -11,6 +11,10 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- Only for the opt-in update check against GitHub Releases (off by default). -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- WorkManager, which schedules that check, merges these two in anyway. Declared here so the
+         list in this file (and in the README) is what the APK really requests. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Lets Pegel show a player's name instead of its package name (no permission involved). -->
     <queries>
@@ -71,6 +75,7 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

@@ -55,4 +55,14 @@ class ServiceStarterTest {
         )
         assertEquals(1, notifications.allNotifications.size)
     }
+
+    // Android 12+ can refuse startForeground itself (a sticky restart in the background).
+    @Test
+    fun `a refused foreground promotion is reported, not thrown`() {
+        assertEquals(true, ServiceStarter.promote(app) { })
+        assertTrue(notifications.allNotifications.isEmpty())
+        assertEquals(false, ServiceStarter.promote(app) { throw IllegalStateException("not allowed") })
+        assertEquals(Notifications.CHANNEL_ATTENTION, notifications.allNotifications.single().channelId)
+        assertEquals(false, ServiceStarter.promote(app) { throw SecurityException("no") })
+    }
 }

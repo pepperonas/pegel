@@ -120,7 +120,7 @@
     <string name="settings_mode_players">Nur Player</string>
     <string name="settings_mode_players_hint">Lässt alles in Ruhe, was sich nicht anmeldet – Spiele, Videos, Anrufe.</string>
     <string name="settings_frame">Blockdauer</string>
-    <string name="settings_frame_hint">Längere Blöcke verzerren bei starker Anhebung weniger, verzögern aber den Ton.</string>
+    <string name="settings_frame_hint">Längere Blöcke verzerren bei starker Anhebung weniger und trennen die tiefsten Bänder besser, verzögern aber den Ton.</string>
     <string name="settings_operation">Betrieb</string>
     <string name="settings_boot">Nach Neustart starten</string>
     <string name="settings_boot_hint">Nur wenn Pegel vorher an war.</string>
@@ -196,4 +196,7 @@
     <string name="profiles_share_title">Profil teilen</string>
     <string name="profiles_import">Profil aus Datei importieren</string>
     <string name="profiles_imported">Profil importiert.</string>
+    <string name="sound_detach">Trennen</string>
+    <string name="help_stuck_title">Pegel nennt noch einen Player, der längst zu ist</string>
+    <string name="help_stuck_text">Ein Player, der hart beendet wird, meldet sich bei Pegel nie ab, und Android sagt es auch nicht. Pegel bleibt dann an nichts hängen. Tippe in der Zeile oben im Tab Klang auf „Trennen“, um zum globalen Mix zurückzukehren; meldet sich der Player wieder an, folgt Pegel ihm erneut.</string>
 </resources>

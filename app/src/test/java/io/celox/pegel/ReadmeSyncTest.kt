@@ -67,4 +67,36 @@ class ReadmeSyncTest {
         assertTrue(workflow.contains("Unexpected signing certificate"))
         assertTrue(workflow.contains("pegel-\${{ steps.ver.outputs.name }}.apk"))
     }
+
+    /** The release job holds the signing key: a moved tag of a third-party action must not reach it. */
+    @Test
+    fun `third-party actions are pinned to a commit`() {
+        val workflows = File(root, ".github/workflows").listFiles { f -> f.extension == "yml" }.orEmpty()
+        assertTrue(workflows.size >= 2)
+        for (w in workflows) {
+            val uses = Regex("""uses:\s*(\S+)""").findAll(w.readText()).map { it.groupValues[1] }.toList()
+            assertTrue(w.name, uses.isNotEmpty())
+            for (u in uses.filterNot { it.startsWith("actions/") }) {
+                assertTrue("${w.name}: $u is not pinned to a commit SHA", Regex(""".+@[0-9a-f]{40}""").matches(u))
+            }
+        }
+    }
+
+    @Test
+    fun `the keystore is gone before anything is published`() {
+        val workflow = File(root, ".github/workflows/release.yml").readText()
+        val cleanup = workflow.indexOf("rm -f release.jks")
+        val publish = workflow.indexOf("action-gh-release")
+        assertTrue(cleanup >= 0 && publish >= 0)
+        assertTrue("clean up the keystore before the publish step", cleanup < publish)
+        assertTrue(workflow.indexOf("assembleRelease") < cleanup)
+    }
+
+    @Test
+    fun `the release workflow has no trigger that cannot work`() {
+        val workflow = File(root, ".github/workflows/release.yml").readText()
+        // A manual run has no tag: GITHUB_REF_NAME is the branch, so it could only ever fail.
+        assertFalse(workflow.contains("workflow_dispatch"))
+        assertTrue(workflow.contains("tags:"))
+    }
 }

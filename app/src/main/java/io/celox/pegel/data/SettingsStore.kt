@@ -37,7 +37,7 @@ data class Settings(
 }
 
 /** What the store holds besides [Settings]: the sound being edited and which profile it belongs to. */
-data class Stored(val settings: Settings, val working: SoundState, val activeProfileId: Long?)
+data class Stored(val settings: Settings, val working: SoundState, val activeProfileId: Long?, val lastDeviceKey: String? = null)
 
 class SettingsStore(private val data: DataStore<Preferences>) {
 
@@ -60,6 +60,7 @@ class SettingsStore(private val data: DataStore<Preferences>) {
             ).normalized(),
             working = p[WORKING]?.let(SoundStateJson::decode) ?: SoundState(),
             activeProfileId = p[ACTIVE_PROFILE],
+            lastDeviceKey = p[LAST_DEVICE],
         )
     }
 
@@ -84,7 +85,12 @@ class SettingsStore(private val data: DataStore<Preferences>) {
         }
     }
 
+    suspend fun writeLastDevice(key: String) {
+        data.edit { it[LAST_DEVICE] = key }
+    }
+
     private companion object {
+        val LAST_DEVICE = stringPreferencesKey("last_device_key")
         val ENABLED = booleanPreferencesKey("enabled")
         val MODE = stringPreferencesKey("session_mode")
         val BASS_CUTOFF = intPreferencesKey("bass_cutoff_hz")

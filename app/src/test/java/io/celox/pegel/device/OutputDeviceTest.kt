@@ -64,4 +64,12 @@ class OutputDeviceTest {
     fun `two devices of the same kind and name share a key by design`() {
         assertEquals(OutputDevice(DeviceKind.BLUETOOTH, "JBL Flip").key, OutputDevice(DeviceKind.BLUETOOTH, "JBL Flip ").key)
     }
+
+    @Test
+    fun `a port that only reports the phone's own model has no name`() {
+        assertEquals("", deviceName("Pixel 7", model = "Pixel 7"))
+        assertEquals("", deviceName(" pixel 7 ", model = "Pixel 7"))
+        assertEquals("", deviceName(null, model = "Pixel 7"))
+        assertEquals("WH-1000XM4", deviceName(" WH-1000XM4 ", model = "Pixel 7"))
+    }
 }

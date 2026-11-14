@@ -207,4 +207,25 @@ class SoundRepositoryTest {
         repo.deletePreset(p.id)
         assertTrue(repo.customPresets.first().isEmpty())
     }
+
+    @Test
+    fun `a burst of changes takes effect at once and the last one ends up stored`() = runBlocking {
+        repeat(300) { i -> repo.update { it.copy(bassStrength = (i % 100) / 100f, bassOn = true) } }
+        assertEquals(0.99f, repo.state.value.bassStrength)
+        repo.flush()
+        assertEquals(0.99f, fx.store.read().working.bassStrength)
+    }
+
+    @Test
+    fun `a pending slider write cannot overwrite a later profile load`() = runBlocking {
+        repo.update { it.withGain(0, 6f) }
+        val loud = repo.saveAsProfile("Loud").getOrThrow()
+        repeat(50) { i -> repo.update { it.withGain(0, -(i % 12).toFloat()) } }
+        repo.loadProfile(loud) // waits for the disk; whatever the writer does afterwards must agree
+        repo.flush()
+        Thread.sleep(100)
+        val stored = fx.store.read()
+        assertEquals(6f, stored.working.gainsDb[0])
+        assertEquals(loud, stored.activeProfileId)
+    }
 }

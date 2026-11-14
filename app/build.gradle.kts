@@ -78,6 +78,20 @@ android {
     testOptions { unitTests.isIncludeAndroidResources = true }
 }
 
+// The drift guards (ReadmeBadgesTest, ReadmeSyncTest, ChangelogTest, ManifestTest, …) read files
+// outside the test classpath. Declared as inputs, otherwise Gradle calls the test task up to date
+// after a README or workflow change and the guard never runs.
+tasks.withType<Test>().configureEach {
+    inputs.files(
+        rootProject.files("README.md", "README.de.md", "CHANGELOG.md", "CHANGELOG.de.md", "LICENSE")
+    ).withPropertyName("docs").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir(rootProject.file(".github")).withPropertyName("github").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file("build.gradle.kts").withPropertyName("buildFile").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file("src/main/AndroidManifest.xml").withPropertyName("manifest").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("src/main/res").withPropertyName("res").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("src/main/java").withPropertyName("sources").withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 // Room writes its expected schema JSON here (checked in) — the reference for migrations.
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 

@@ -18,8 +18,8 @@ private const val PRE_EQ_BANDS = 2
  * One [DynamicsProcessing] carries four things:
  *  - post-EQ, ten bands → the equalizer
  *  - pre-EQ, two bands → bass (band 0 below the cutoff gets the boost, band 1 stays neutral)
- *  - limiter post gain → loudness; the limiter itself keeps boosted audio from clipping
- *  - input gain per channel → balance
+ *  - input gain per channel → balance, plus the loudness gain
+ *  - limiter → catches what EQ, bass and loudness push over full scale (no gain behind it)
  */
 class AndroidEffectChain private constructor(
     override val sessionId: Int,
@@ -57,27 +57,30 @@ class AndroidEffectChain private constructor(
                         )
                     }
                 }
-                if (old?.limiterPostGainDb != plan.limiterPostGainDb) {
-                    dp.setLimiterAllChannelsTo(limiter(plan.limiterPostGainDb))
-                }
-                if (old?.leftGainDb != plan.leftGainDb) dp.setInputGainbyChannel(0, plan.leftGainDb)
-                if (old?.rightGainDb != plan.rightGainDb) dp.setInputGainbyChannel(1, plan.rightGainDb)
+                if (old == null) dp.setLimiterAllChannelsTo(LIMITER)
+                val (left, right) = inputGainsDb(plan)
+                val before = old?.let(::inputGainsDb)
+                if (before?.first != left) dp.setInputGainbyChannel(0, left)
+                if (before?.second != right) dp.setInputGainbyChannel(1, right)
                 if (dp.enabled != enabled) dp.enabled = enabled
             }
-            // A session that died surfaces here first; tell the engine instead of failing silently.
+            // If the platform throws, the chain is unusable: tell the engine instead of failing
+            // silently. (A session whose player died does NOT throw — see EffectEngine.forgetPlayers.)
             if (!ok) onControlLost?.invoke()
         }
         virtualizer?.let { v ->
             guard("virtualizer") {
                 val on = enabled && plan.virtualizerStrength != null
-                plan.virtualizerStrength?.let { if (v.strengthSupported) v.setStrength(it.toShort()) }
+                val strength = plan.virtualizerStrength
+                if (strength != null && strength != old?.virtualizerStrength && v.strengthSupported) v.setStrength(strength.toShort())
                 if (v.enabled != on) v.enabled = on
             }
         }
         reverb?.let { r ->
             guard("reverb") {
                 val on = enabled && plan.reverb != ReverbRoom.NONE
-                if (on) r.preset = presetOf(plan.reverb)
+                // Only on a real change: re-setting a preset restarts the reverb audibly.
+                if (on && plan.reverb != old?.reverb) r.preset = presetOf(plan.reverb)
                 if (r.enabled != on) r.enabled = on
             }
         }
@@ -114,9 +117,8 @@ class AndroidEffectChain private constructor(
             return AndroidEffectChain(sessionId, dp, virt, rev)
         }
 
-        private fun limiter(postGainDb: Float) = DynamicsProcessing.Limiter(
-            true, true, 0, 1f, 60f, 10f, -2f, postGainDb
-        )
+        /** inUse, enabled, linkGroup, attack ms, release ms, ratio, threshold dB, post gain dB. */
+        private val LIMITER = DynamicsProcessing.Limiter(true, true, 0, 1f, 60f, 10f, -2f, LIMITER_POST_GAIN_DB)
 
         private fun presetOf(room: ReverbRoom): Short = when (room) {
             ReverbRoom.NONE -> PresetReverb.PRESET_NONE

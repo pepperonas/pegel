@@ -4,10 +4,15 @@ import androidx.room.withTransaction
 import io.celox.pegel.audio.Preset
 import io.celox.pegel.audio.SoundState
 import io.celox.pegel.audio.SoundStateJson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
@@ -36,6 +41,25 @@ class SoundRepository private constructor(
 ) {
     private val lock = Mutex()
 
+    // A slider produces dozens of changes a second. They take effect at once (the flows below);
+    // storing them is left to one writer that always writes the *latest* state, so a burst costs
+    // a couple of disk writes instead of one per step — and an older write can never land after a
+    // newer one.
+    private val writeLock = Mutex()
+    private val dirty = Channel<Unit>(Channel.CONFLATED)
+    private val writer = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    init {
+        writer.launch { for (signal in dirty) persistWorking() }
+    }
+
+    private suspend fun persistWorking() = writeLock.withLock {
+        store.writeWorking(_state.value, _active.value?.id)
+    }
+
+    /** Waits until the sound being edited is on disk. */
+    suspend fun flush() = persistWorking()
+
     private val _state = MutableStateFlow(stored.working)
     val state: StateFlow<SoundState> = _state
 
@@ -55,7 +79,7 @@ class SoundRepository private constructor(
     // ---- the sound being edited ----
 
     suspend fun update(transform: (SoundState) -> SoundState) = lock.withLock {
-        setWorking(transform(_state.value).normalized(), _active.value)
+        setWorking(transform(_state.value).normalized(), _active.value, wait = false)
     }
 
     suspend fun updateSettings(transform: (Settings) -> Settings) = lock.withLock {
@@ -65,11 +89,12 @@ class SoundRepository private constructor(
         store.writeSettings(next)
     }
 
-    private suspend fun setWorking(state: SoundState, active: Profile?) {
+    /** [wait] = false for the slider path; profile operations are rare and wait for the disk. */
+    private suspend fun setWorking(state: SoundState, active: Profile?, wait: Boolean = true) {
         _state.value = state
         _active.value = active
         _modified.value = active != null && active.state != state
-        store.writeWorking(state, active?.id)
+        if (wait) persistWorking() else dirty.trySend(Unit)
     }
 
     // ---- profiles ----
@@ -130,6 +155,16 @@ class SoundRepository private constructor(
     }
 
     // ---- devices ----
+
+    /** The output auto-apply acted on last — stored, so a restart on the same output is not a "change". */
+    @Volatile var lastDeviceKey: String? = stored.lastDeviceKey
+        private set
+
+    suspend fun rememberDevice(key: String) {
+        if (key == lastDeviceKey) return
+        lastDeviceKey = key
+        store.writeLastDevice(key)
+    }
 
     /** Remembers an output device so a profile can be bound to it; keeps an existing binding. */
     suspend fun seeDevice(key: String, label: String) = lock.withLock {

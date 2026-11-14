@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.HearingDisabled
 import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material.icons.rounded.LinkOff
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ fun HelpScreen(onBack: () -> Unit) {
     val topics = listOf(
         Triple(R.string.help_how_title, R.string.help_how_text, Icons.Rounded.Lightbulb),
         Triple(R.string.help_nothing_title, R.string.help_nothing_text, Icons.Rounded.HearingDisabled),
+        Triple(R.string.help_stuck_title, R.string.help_stuck_text, Icons.Rounded.LinkOff),
         Triple(R.string.help_players_title, R.string.help_players_text, Icons.Rounded.MusicNote),
         Triple(R.string.help_unsupported_title, R.string.help_unsupported_text, Icons.Rounded.Block),
         Triple(R.string.help_bluetooth_title, R.string.help_bluetooth_text, Icons.Rounded.Bluetooth),

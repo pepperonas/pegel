@@ -59,4 +59,14 @@ class SessionReceiverTest {
         val e = parseSessionIntent(intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION, pkg = null))
         assertEquals(SessionEvent(true, 42, "?"), e)
     }
+
+    // Reviewer finding: the activity replayed a player's "Equalizer" intent on every rotation and
+    // every return from recents, re-opening a session the player had long closed.
+    @Test
+    fun `a launch intent is acted on once, not on every recreation`() {
+        assertEquals(true, isFreshLaunch(restored = false, flags = 0))
+        assertEquals(false, isFreshLaunch(restored = true, flags = 0))
+        assertEquals(false, isFreshLaunch(restored = false, flags = Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY))
+        assertEquals(true, isFreshLaunch(restored = false, flags = Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
 }

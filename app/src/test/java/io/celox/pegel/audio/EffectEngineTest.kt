@@ -210,8 +210,60 @@ class EffectEngineTest {
         engine.setPlan(other)
         assertTrue("a slider move is not a reason to fight for the session", factory.live.isEmpty())
 
+        // what the service does on every state change must not count as "the user acted"
+        engine.setEnabled(true)
+        assertTrue("re-asserting 'on' is not a reason either", factory.live.isEmpty())
+
+        engine.setEnabled(false)
         engine.setEnabled(true)
         assertEquals(listOf(GLOBAL_SESSION), liveSessions())
         assertFalse(engine.state.value.failed)
+    }
+
+    @Test
+    fun `re-asserting on retries when nothing could be attached, without rebuilding what works`() {
+        factory.failing += GLOBAL_SESSION
+        engine.setEnabled(true)
+        assertTrue(engine.state.value.failed)
+        factory.failing.clear() // the other equalizer went away
+        engine.setEnabled(true)
+        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
+        val chain = factory.liveOn(GLOBAL_SESSION)
+        engine.setEnabled(true)
+        assertEquals(0, chain.released)
+        assertEquals(1, factory.created.size)
+    }
+
+    // A player that is killed never says goodbye, and Android does not tell an effect that its
+    // session is dead — the user needs a way out.
+    @Test
+    fun `detaching forgets every player and returns to the global mix`() {
+        engine.setEnabled(true)
+        engine.onSessionOpened(42, "a.b")
+        engine.onSessionOpened(43, "c.d")
+        engine.forgetPlayers()
+        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
+        assertEquals(Target.GlobalMix, engine.state.value.target)
+        // a player that announces itself again is followed again
+        engine.onSessionOpened(42, "a.b")
+        assertEquals(Target.Players(listOf("a.b")), engine.state.value.target)
+    }
+
+    @Test
+    fun `detaching in players-only mode leaves nothing attached`() {
+        engine.setMode(SessionMode.PLAYERS_ONLY)
+        engine.setEnabled(true)
+        engine.onSessionOpened(42, "a.b")
+        engine.forgetPlayers()
+        assertTrue(factory.live.isEmpty())
+        assertEquals(Target.None, engine.state.value.target)
+    }
+
+    @Test
+    fun `any app can announce sessions - only the newest few are kept`() {
+        engine.setEnabled(true)
+        for (id in 1..50) engine.onSessionOpened(id, "spam$id")
+        assertEquals(MAX_PLAYER_SESSIONS, factory.live.size)
+        assertEquals((50 - MAX_PLAYER_SESSIONS + 1..50).toList(), liveSessions())
     }
 }
