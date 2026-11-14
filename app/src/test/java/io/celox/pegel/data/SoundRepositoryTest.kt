@@ -29,7 +29,6 @@ class SoundRepositoryTest {
         assertEquals(SoundState(), repo.state.value)
         assertEquals(Settings(), repo.settings.value)
         assertFalse(repo.settings.value.enabled)
-        assertFalse(repo.settings.value.updateCheck)
         assertNull(repo.activeProfile.value)
         assertFalse(repo.modified.value)
     }

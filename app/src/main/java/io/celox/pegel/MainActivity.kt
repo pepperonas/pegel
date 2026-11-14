@@ -6,9 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Equalizer
@@ -21,7 +19,6 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -34,6 +31,8 @@ import androidx.navigation.compose.rememberNavController
 import io.celox.pegel.service.ServiceStarter
 import io.celox.pegel.service.handleSessionIntent
 import io.celox.pegel.ui.profiles.ProfilesScreen
+import io.celox.pegel.ui.settings.HelpScreen
+import io.celox.pegel.ui.settings.SettingsScreen
 import io.celox.pegel.ui.sound.SoundScreen
 import io.celox.pegel.ui.theme.PegelTheme
 import io.celox.pegel.ui.theme.ThemeMode
@@ -103,12 +102,10 @@ fun PegelRoot() {
         NavHost(nav, startDestination = Destination.SOUND.route, modifier = Modifier.padding(padding)) {
             composable(Destination.SOUND.route) { SoundScreen(onOpenProfiles = { go(Destination.PROFILES) }) }
             composable(Destination.PROFILES.route) { ProfilesScreen() }
-            composable(Destination.SETTINGS.route) { Placeholder(Destination.SETTINGS) }
+            composable(Destination.SETTINGS.route) { SettingsScreen(onOpenHelp = { nav.navigate(HELP_ROUTE) }) }
+            composable(HELP_ROUTE) { HelpScreen(onBack = { nav.popBackStack() }) }
         }
     }
 }
 
-@Composable
-private fun Placeholder(d: Destination) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(d.label)) }
-}
+private const val HELP_ROUTE = "help"

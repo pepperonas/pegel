@@ -56,3 +56,13 @@ class SoundStateTest {
         assertEquals(Tuning(90, 15, 20), Tuning(bassCutoffHz = 86).normalized())
     }
 }
+
+class TuningChoicesTest {
+    @Test
+    fun `the choices offered in settings are exactly the values tuning accepts`() {
+        assertEquals((10..150 step 10).toList(), Tuning.BASS_CUTOFFS_HZ)
+        assertEquals(listOf(5, 10, 15, 20, 25, 30), Tuning.MAX_GAINS_DB)
+        for (hz in Tuning.BASS_CUTOFFS_HZ) assertEquals(hz, Tuning(bassCutoffHz = hz).normalized().bassCutoffHz)
+        for (db in Tuning.MAX_GAINS_DB) assertEquals(db, Tuning(bassMaxDb = db, loudnessMaxDb = db).normalized().bassMaxDb)
+    }
+}

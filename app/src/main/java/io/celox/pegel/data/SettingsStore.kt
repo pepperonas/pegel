@@ -26,8 +26,6 @@ data class Settings(
     val showBalance: Boolean = false,
     val frameDurationMs: Int = 10,
     val startOnBoot: Boolean = true,
-    /** Opt-in: the only thing in the app that goes online. */
-    val updateCheck: Boolean = false,
 ) {
     fun normalized(): Settings =
         copy(tuning = tuning.normalized(), frameDurationMs = frameDurationMs.coerceIn(FRAME_MIN_MS, FRAME_MAX_MS))
@@ -59,7 +57,6 @@ class SettingsStore(private val data: DataStore<Preferences>) {
                 showBalance = p[SHOW_BALANCE] ?: d.showBalance,
                 frameDurationMs = p[FRAME_MS] ?: d.frameDurationMs,
                 startOnBoot = p[START_ON_BOOT] ?: d.startOnBoot,
-                updateCheck = p[UPDATE_CHECK] ?: d.updateCheck,
             ).normalized(),
             working = p[WORKING]?.let(SoundStateJson::decode) ?: SoundState(),
             activeProfileId = p[ACTIVE_PROFILE],
@@ -77,7 +74,6 @@ class SettingsStore(private val data: DataStore<Preferences>) {
             it[SHOW_BALANCE] = s.showBalance
             it[FRAME_MS] = s.frameDurationMs
             it[START_ON_BOOT] = s.startOnBoot
-            it[UPDATE_CHECK] = s.updateCheck
         }
     }
 
@@ -98,7 +94,6 @@ class SettingsStore(private val data: DataStore<Preferences>) {
         val SHOW_BALANCE = booleanPreferencesKey("show_balance")
         val FRAME_MS = intPreferencesKey("frame_duration_ms")
         val START_ON_BOOT = booleanPreferencesKey("start_on_boot")
-        val UPDATE_CHECK = booleanPreferencesKey("update_check")
         val WORKING = stringPreferencesKey("working_state")
         val ACTIVE_PROFILE = longPreferencesKey("active_profile_id")
     }
