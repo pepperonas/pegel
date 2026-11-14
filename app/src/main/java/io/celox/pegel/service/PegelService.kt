@@ -1,5 +1,6 @@
 package io.celox.pegel.service
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo
@@ -19,6 +20,7 @@ import io.celox.pegel.device.AutoApply
 import io.celox.pegel.device.DeviceKind
 import io.celox.pegel.device.DeviceWatcher
 import io.celox.pegel.ui.common.appLabel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -30,6 +32,9 @@ class PegelService : LifecycleService() {
 
     private val sessionReceiver = SessionReceiver()
     private var receiverRegistered = false
+
+    /** Keeps the status notification in step with the engine while the service lives. */
+    private var mirror: Job? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -82,7 +87,7 @@ class PegelService : LifecycleService() {
             }
         }
 
-        lifecycleScope.launch {
+        mirror = lifecycleScope.launch {
             combine(engine.state, repo.activeProfile, repo.modified) { e, p, m -> Triple(e, p, m) }.collect { (e, p, m) ->
                 Notifications.updateStatus(this@PegelService, targetText(e), profileText(p, m))
             }
@@ -99,7 +104,12 @@ class PegelService : LifecycleService() {
 
     override fun onDestroy() {
         if (receiverRegistered) unregisterReceiver(sessionReceiver)
+        // Order matters: stop mirroring the engine *before* shutting it down. Its last state change
+        // ("not attached") would otherwise re-post the status notification after the service is
+        // gone — an ongoing notification nobody could dismiss.
+        mirror?.cancel()
         container.engine.shutdown()
+        getSystemService(NotificationManager::class.java).cancel(Notifications.ID_STATUS)
         super.onDestroy()
     }
 

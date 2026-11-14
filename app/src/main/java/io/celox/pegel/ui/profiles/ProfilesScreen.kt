@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -158,12 +159,13 @@ fun ProfilesScreen() {
                 Button(onClick = { askNew = true }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.profiles_save_new), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // Wraps instead of cutting off: at large font sizes the label does not fit one line.
+                    Text(stringResource(R.string.profiles_save_new), textAlign = TextAlign.Center)
                 }
                 OutlinedButton(
                     onClick = { pickProfile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.profiles_import), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                ) { Text(stringResource(R.string.profiles_import), textAlign = TextAlign.Center) }
             }
 
             SectionCard(title = stringResource(R.string.devices_section), icon = Icons.Rounded.Devices, index = 1) {
