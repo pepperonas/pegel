@@ -14,11 +14,9 @@ Single Gradle module (`:app`), Kotlin + Jetpack Compose (Material 3 Expressive),
 target+compile 35, JDK 17. minSdk is 28 rather than the house default 26 because
 `DynamicsProcessing` — the engine everything runs on — arrived in Android 9.
 
-The feature set was inspired by Flat Equalizer. Pegel is an independent implementation: never copy
-code, texts, layouts or preset tables from that app (or any decompiled APK) into this repository.
-
-Design and plan of 1.0.0: `docs/superpowers/specs/2026-11-14-pegel-design.md`,
-`docs/superpowers/plans/2026-11-14-pegel-v1.md`.
+The feature set was inspired by Flat Equalizer. Pegel is an independent implementation written
+against Android's public API: never copy code, texts, layouts or preset tables from that or any other
+equalizer app into this repository.
 
 ## Build & run
 
