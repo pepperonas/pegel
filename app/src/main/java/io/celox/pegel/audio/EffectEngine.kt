@@ -8,7 +8,7 @@ const val MAX_PLAYER_SESSIONS = 8
 
 /** Where Pegel attaches its effects. */
 enum class SessionMode {
-    /** Players that announce their session; the global mix while none does. */
+    /** The global mix where the device grants it; players that announce their session otherwise. */
     AUTO,
     GLOBAL_ONLY,
     PLAYERS_ONLY,
@@ -45,8 +45,9 @@ class EffectEngine(private val factory: EffectChainFactory) {
 
     /**
      * Set when another app took the global mix away. Pegel does not grab it back on its own —
-     * two equalizers snatching the session from each other would never settle. Any deliberate
-     * event (switch, mode, player) clears it.
+     * two equalizers snatching the session from each other would never settle. Only the user
+     * clears it (switch, mode, detach) — a player announcing itself does not: players do that on
+     * every track.
      */
     private var globalLost = false
 
@@ -96,13 +97,11 @@ class EffectEngine(private val factory: EffectChainFactory) {
         if (players.put(sessionId, packageName) == packageName && chains.containsKey(sessionId)) return
         // The announcement is an open broadcast: keep the newest few, so no app can grow this forever.
         while (players.size > MAX_PLAYER_SESSIONS) players.remove(players.keys.first())
-        globalLost = false
         reconcile()
     }
 
     @Synchronized fun onSessionClosed(sessionId: Int) {
         if (players.remove(sessionId) == null) return
-        globalLost = false
         reconcile()
     }
 
@@ -119,37 +118,34 @@ class EffectEngine(private val factory: EffectChainFactory) {
         reconcile()
     }
 
-    private fun wanted(): Set<Int> = when {
-        !enabled -> emptySet()
-        mode == SessionMode.GLOBAL_ONLY -> setOf(GLOBAL_SESSION)
-        mode == SessionMode.PLAYERS_ONLY -> players.keys.toSet()
-        players.isNotEmpty() -> players.keys.toSet()
-        else -> setOf(GLOBAL_SESSION)
+    private fun attach(id: Int): Boolean {
+        if (chains.containsKey(id)) return true
+        val chain = factory.create(id) ?: return false
+        chain.onControlLost = { onControlLost(id) }
+        chains[id] = chain
+        chain.apply(plan, true)
+        return true
     }
 
+    /** Takes the global mix if the mode wants it and the device (still) grants it. */
+    private fun globalAttached(): Boolean =
+        enabled && mode != SessionMode.PLAYERS_ONLY && !globalLost && attach(GLOBAL_SESSION)
+
     private fun reconcile() {
-        // A player whose session cannot be equalized is forgotten, which can change what is wanted
-        // (AUTO falls back to the global mix) — hence the loop. It ends: each round drops a player.
-        while (true) {
-            val wanted = wanted()
-            chains.keys.filter { it !in wanted }.forEach { id ->
-                chains.remove(id)?.let { it.onControlLost = null; it.release() }
-            }
-            var dropped = false
-            for (id in wanted) {
-                if (chains.containsKey(id)) continue
-                if (id == GLOBAL_SESSION && globalLost) continue
-                val chain = factory.create(id)
-                if (chain == null) {
-                    if (id != GLOBAL_SESSION) { players.remove(id); dropped = true }
-                    continue
-                }
-                chain.onControlLost = { onControlLost(id) }
-                chains[id] = chain
-                chain.apply(plan, true)
-            }
-            if (!dropped) break
+        // AUTO: the global mix wherever the device grants it — it reaches everything the phone
+        // plays, and an effect on an announced session is not audible on every device. Players
+        // are the fallback where the global mix is refused or was taken by another equalizer.
+        val wanted: Set<Int> = when {
+            !enabled -> emptySet()
+            globalAttached() -> setOf(GLOBAL_SESSION)
+            mode == SessionMode.GLOBAL_ONLY -> emptySet()
+            else -> players.keys.toSet()
         }
+        chains.keys.filter { it !in wanted }.forEach { id ->
+            chains.remove(id)?.let { it.onControlLost = null; it.release() }
+        }
+        // A player whose session cannot be equalized is forgotten.
+        wanted.forEach { id -> if (!attach(id)) players.remove(id) }
         publish()
     }
 
@@ -165,6 +161,6 @@ class EffectEngine(private val factory: EffectChainFactory) {
             virtualizer = live.all { it.status.virtualizer },
             reverb = live.all { it.status.reverb },
         )
-        _state.value = EngineState(target, status, failed = live.isEmpty() && wanted().isNotEmpty())
+        _state.value = EngineState(target, status, failed = enabled && live.isEmpty() && !(mode == SessionMode.PLAYERS_ONLY && players.isEmpty()))
     }
 }

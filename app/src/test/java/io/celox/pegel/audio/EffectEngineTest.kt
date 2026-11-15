@@ -31,21 +31,63 @@ class EffectEngineTest {
     }
 
     @Test
-    fun `auto follows a player that announces itself and returns to the global mix when it leaves`() {
+    fun `auto stays on the global mix when a player announces itself`() {
+        // Field finding (Galaxy S24 Ultra, Spotify): the announced session took the effect and
+        // nothing was audible, while the global mix worked. What the device grants wins.
         engine.setEnabled(true)
         val global = factory.liveOn(GLOBAL_SESSION)
         engine.onSessionOpened(42, "a.b")
-        assertEquals(listOf(42), liveSessions())
-        assertEquals(1, global.released)
-        assertEquals(Target.Players(listOf("a.b")), engine.state.value.target)
+        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
+        assertEquals(0, global.released)
+        assertEquals(1, factory.created.size)
+        assertEquals(Target.GlobalMix, engine.state.value.target)
 
         engine.onSessionClosed(42)
-        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
+        assertEquals(0, global.released)
         assertEquals(Target.GlobalMix, engine.state.value.target)
     }
 
     @Test
+    fun `auto follows players where the device refuses the global mix`() {
+        factory.failing += GLOBAL_SESSION
+        engine.setEnabled(true)
+        engine.onSessionOpened(42, "a.b")
+        assertEquals(listOf(42), liveSessions())
+        assertEquals(Target.Players(listOf("a.b")), engine.state.value.target)
+        assertFalse(engine.state.value.failed)
+
+        engine.onSessionClosed(42)
+        assertTrue(factory.live.isEmpty())
+        assertTrue(engine.state.value.failed)
+    }
+
+    @Test
+    fun `auto returns to the global mix once the device grants it`() {
+        factory.failing += GLOBAL_SESSION
+        engine.setEnabled(true)
+        engine.onSessionOpened(42, "a.b")
+        val player = factory.liveOn(42)
+        factory.failing.clear()
+        engine.onSessionOpened(43, "c.d")
+        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
+        assertEquals(1, player.released)
+        assertEquals(Target.GlobalMix, engine.state.value.target)
+    }
+
+    @Test
+    fun `auto follows players after losing the global mix, without grabbing it back`() {
+        engine.setEnabled(true)
+        factory.liveOn(GLOBAL_SESSION).onControlLost!!.invoke()
+        engine.onSessionOpened(42, "a.b")
+        assertEquals("a player is not a reason to fight for the session", listOf(42), liveSessions())
+        assertEquals(Target.Players(listOf("a.b")), engine.state.value.target)
+        engine.onSessionClosed(42)
+        assertTrue(factory.live.isEmpty())
+    }
+
+    @Test
     fun `two players each get a chain`() {
+        engine.setMode(SessionMode.PLAYERS_ONLY)
         engine.setEnabled(true)
         engine.onSessionOpened(42, "a.b")
         engine.onSessionOpened(43, "c.d")
@@ -60,6 +102,16 @@ class EffectEngineTest {
         engine.onSessionOpened(42, "a.b")
         assertEquals(listOf(GLOBAL_SESSION), liveSessions())
         assertEquals(Target.GlobalMix, engine.state.value.target)
+    }
+
+    @Test
+    fun `global only does not fall back to players where the global mix is refused`() {
+        factory.failing += GLOBAL_SESSION
+        engine.setMode(SessionMode.GLOBAL_ONLY)
+        engine.setEnabled(true)
+        engine.onSessionOpened(42, "a.b")
+        assertTrue(factory.live.isEmpty())
+        assertTrue(engine.state.value.failed)
     }
 
     @Test
@@ -89,6 +141,7 @@ class EffectEngineTest {
         engine.setEnabled(true)
         assertEquals(plan to true, factory.liveOn(GLOBAL_SESSION).applied.last())
 
+        engine.setMode(SessionMode.PLAYERS_ONLY)
         engine.onSessionOpened(42, "a.b")
         engine.onSessionOpened(43, "c.d")
         engine.setPlan(other)
@@ -98,6 +151,7 @@ class EffectEngineTest {
 
     @Test
     fun `switching off releases everything but remembers the players`() {
+        engine.setMode(SessionMode.PLAYERS_ONLY)
         engine.setEnabled(true)
         engine.onSessionOpened(42, "a.b")
         engine.setEnabled(false)
@@ -118,6 +172,7 @@ class EffectEngineTest {
 
     @Test
     fun `the same session announced twice gets one chain`() {
+        engine.setMode(SessionMode.PLAYERS_ONLY)
         engine.setEnabled(true)
         engine.onSessionOpened(42, "a.b")
         engine.onSessionOpened(42, "a.b")
@@ -131,6 +186,8 @@ class EffectEngineTest {
         engine.onSessionOpened(-7, "a.b")
         assertEquals(listOf(GLOBAL_SESSION), liveSessions())
         assertEquals(Target.GlobalMix, engine.state.value.target)
+        engine.setMode(SessionMode.PLAYERS_ONLY)
+        assertTrue(factory.live.isEmpty())
     }
 
     @Test
@@ -179,14 +236,16 @@ class EffectEngineTest {
     // Review focus 3
     @Test
     fun `a player that vanishes without saying goodbye is dropped`() {
+        engine.setMode(SessionMode.PLAYERS_ONLY)
         engine.setEnabled(true)
         engine.onSessionOpened(42, "a.b")
         val chain = factory.liveOn(42)
         chain.onControlLost!!.invoke()
         assertEquals(1, chain.released)
-        assertEquals(listOf(GLOBAL_SESSION), liveSessions())
-        assertEquals(Target.GlobalMix, engine.state.value.target)
+        assertTrue(factory.live.isEmpty())
+        assertEquals(Target.None, engine.state.value.target)
         // and it stays forgotten
+        engine.setMode(SessionMode.AUTO)
         engine.setMode(SessionMode.PLAYERS_ONLY)
         assertTrue(factory.live.isEmpty())
     }
@@ -239,14 +298,13 @@ class EffectEngineTest {
     @Test
     fun `detaching forgets every player and returns to the global mix`() {
         engine.setEnabled(true)
+        factory.liveOn(GLOBAL_SESSION).onControlLost!!.invoke()
         engine.onSessionOpened(42, "a.b")
         engine.onSessionOpened(43, "c.d")
+        assertEquals(listOf(42, 43), liveSessions())
         engine.forgetPlayers()
         assertEquals(listOf(GLOBAL_SESSION), liveSessions())
         assertEquals(Target.GlobalMix, engine.state.value.target)
-        // a player that announces itself again is followed again
-        engine.onSessionOpened(42, "a.b")
-        assertEquals(Target.Players(listOf("a.b")), engine.state.value.target)
     }
 
     @Test
@@ -261,6 +319,7 @@ class EffectEngineTest {
 
     @Test
     fun `any app can announce sessions - only the newest few are kept`() {
+        engine.setMode(SessionMode.PLAYERS_ONLY)
         engine.setEnabled(true)
         for (id in 1..50) engine.onSessionOpened(id, "spam$id")
         assertEquals(MAX_PLAYER_SESSIONS, factory.live.size)

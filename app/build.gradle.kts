@@ -23,8 +23,8 @@ android {
         // 28, not the house default 26: DynamicsProcessing (the 10-band engine) arrived in Android 9.
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         vectorDrawables { useSupportLibrary = true }
         // The UI ships in English (default) and German. Without this filter the Material libraries
         // would bring their own French, Spanish, … texts into an otherwise English screen.

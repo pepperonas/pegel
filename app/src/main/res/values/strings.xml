@@ -115,7 +115,7 @@
     <string name="unit_ms">%1$d ms</string>
     <string name="settings_connection">Connection</string>
     <string name="settings_mode_auto">Automatic</string>
-    <string name="settings_mode_auto_hint">Follows players that announce their audio. Uses the global mix while none does.</string>
+    <string name="settings_mode_auto_hint">Uses the global mix wherever the device allows it. Follows players that announce their audio where it does not.</string>
     <string name="settings_mode_global">Global mix only</string>
     <string name="settings_mode_global_hint">Shapes everything the phone plays at once. Does not work on every device.</string>
     <string name="settings_mode_players">Players only</string>

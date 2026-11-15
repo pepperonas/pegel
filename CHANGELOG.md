@@ -4,6 +4,21 @@ All notable changes to Pegel. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-11-15
+
+### Changed
+
+- **Automatic connection prefers the global mix.** Wherever the device grants it, Pegel now stays
+  on the global mix, which reaches everything the phone plays. Players that announce their audio
+  are followed only where the global mix is refused or another equalizer has taken it. Before,
+  an announcing player pulled Pegel onto its own session — on a Galaxy S24 Ultra with Spotify
+  that left the sound unchanged. Reverb needs a player's own session: choose *Players only* for it.
+- A player announcing itself no longer makes Pegel take the global mix back from another equalizer.
+
+### Added
+
+- The About section links to the product page, <https://pegel.celox.io>.
+
 ## [1.0.0] - 2026-11-15
 
 First release.

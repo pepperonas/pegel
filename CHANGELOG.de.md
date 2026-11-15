@@ -4,6 +4,22 @@ Alle nennenswerten Änderungen an Pegel. Format nach
 [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach
 [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.0.1] - 2026-11-15
+
+### Geändert
+
+- **Die automatische Verbindung bevorzugt den globalen Mix.** Wo das Gerät ihn zulässt, bleibt
+  Pegel jetzt auf dem globalen Mix, der alles erreicht, was das Handy abspielt. Playern, die ihre
+  Wiedergabe anmelden, folgt Pegel nur noch dort, wo der globale Mix verweigert wird oder ein
+  anderer Equalizer ihn übernommen hat. Vorher zog ein Player, der sich anmeldet, Pegel auf seine
+  eigene Sitzung — auf einem Galaxy S24 Ultra mit Spotify blieb der Klang dadurch unverändert.
+  Hall braucht die eigene Sitzung eines Players: dafür *Nur Player* wählen.
+- Meldet sich ein Player an, holt Pegel den globalen Mix nicht mehr von einem anderen Equalizer zurück.
+
+### Neu
+
+- Der Abschnitt „Über“ verlinkt die Produktseite, <https://pegel.celox.io>.
+
 ## [1.0.0] - 2026-11-15
 
 Erste Version.

@@ -114,7 +114,7 @@
     <string name="unit_ms">%1$d ms</string>
     <string name="settings_connection">Verbindung</string>
     <string name="settings_mode_auto">Automatisch</string>
-    <string name="settings_mode_auto_hint">Folgt Playern, die ihre Wiedergabe anmelden. Nutzt den globalen Mix, solange keiner das tut.</string>
+    <string name="settings_mode_auto_hint">Nutzt den globalen Mix, wo das Gerät ihn zulässt. Folgt sonst Playern, die ihre Wiedergabe anmelden.</string>
     <string name="settings_mode_global">Nur globaler Mix</string>
     <string name="settings_mode_global_hint">Formt alles, was das Handy abspielt, auf einmal. Funktioniert nicht auf jedem Gerät.</string>
     <string name="settings_mode_players">Nur Player</string>
