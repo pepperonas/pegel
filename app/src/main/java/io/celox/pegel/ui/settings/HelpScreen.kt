@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.BatteryAlert
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Block
@@ -44,6 +46,8 @@ fun HelpScreen(onBack: () -> Unit) {
         Triple(R.string.help_players_title, R.string.help_players_text, Icons.Rounded.MusicNote),
         Triple(R.string.help_unsupported_title, R.string.help_unsupported_text, Icons.Rounded.Block),
         Triple(R.string.help_bluetooth_title, R.string.help_bluetooth_text, Icons.Rounded.Bluetooth),
+        Triple(R.string.help_suggest_title, R.string.help_suggest_text, Icons.Rounded.AutoAwesome),
+        Triple(R.string.help_samsung_title, R.string.help_samsung_text, Icons.Rounded.Tune),
         Triple(R.string.help_stops_title, R.string.help_stops_text, Icons.Rounded.BatteryAlert),
         Triple(R.string.help_distortion_title, R.string.help_distortion_text, Icons.Rounded.GraphicEq),
     )

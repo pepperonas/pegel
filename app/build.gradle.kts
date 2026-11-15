@@ -23,8 +23,8 @@ android {
         // 28, not the house default 26: DynamicsProcessing (the 10-band engine) arrived in Android 9.
         minSdk = 28
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
         vectorDrawables { useSupportLibrary = true }
         // The UI ships in English (default) and German. Without this filter the Material libraries
         // would bring their own French, Spanish, … texts into an otherwise English screen.
@@ -88,6 +88,8 @@ tasks.withType<Test>().configureEach {
     inputs.dir(rootProject.file(".github")).withPropertyName("github").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.file("build.gradle.kts").withPropertyName("buildFile").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.file("src/main/AndroidManifest.xml").withPropertyName("manifest").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("src/main/assets").withPropertyName("assets").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("schemas").withPropertyName("schemas").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("src/main/res").withPropertyName("res").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("src/main/java").withPropertyName("sources").withPathSensitivity(PathSensitivity.RELATIVE)
 }

@@ -123,14 +123,14 @@ class PegelService : LifecycleService() {
 
     private fun targetText(e: EngineState): String = when (val t = e.target) {
         Target.GlobalMix -> getString(R.string.target_global)
-        is Target.Players -> t.packages.joinToString { appLabel(this, it) }
+        is Target.Players -> getString(R.string.target_players, t.packages.joinToString { appLabel(this, it) })
         Target.None -> getString(if (e.failed) R.string.target_failed else R.string.target_waiting)
     }
 
     private fun profileText(p: Profile?, modified: Boolean): String = when {
-        p == null -> getString(R.string.profile_unsaved)
-        modified -> getString(R.string.profile_modified, p.name)
-        else -> p.name
+        p == null -> getString(R.string.notif_sound_unsaved)
+        modified -> getString(R.string.notif_sound_modified, p.name)
+        else -> getString(R.string.notif_sound_profile, p.name)
     }
 
     companion object {

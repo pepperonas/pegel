@@ -1,5 +1,8 @@
 package io.celox.pegel.ui.sound
 
+import io.celox.pegel.audio.planFor
+import io.celox.pegel.audio.ReverbRoom
+import io.celox.pegel.audio.ChainStatus
 import io.celox.pegel.audio.BUILT_IN_PRESETS
 import io.celox.pegel.audio.EngineState
 import io.celox.pegel.audio.Preset
@@ -19,12 +22,36 @@ sealed interface ProfileLabel {
 /** The one thing worth telling the user above the cards, most serious first. */
 enum class Notice { ENGINE_FAILED, EQ_UNAVAILABLE, NOTIFICATIONS_OFF }
 
+/** The effects that change the sound right now — what the status line names. */
+enum class ActiveEffect { EQUALIZER, BASS, LOUDNESS, VIRTUALIZER, REVERB, BALANCE }
+
+/**
+ * Switched on is not the same as doing something: an equalizer with every band at zero and an
+ * effect the device did not grant change nothing, and the status must not claim they do.
+ * [status] is null while nothing is attached — then nothing is known to be missing.
+ */
+fun activeEffects(state: SoundState, status: ChainStatus?): List<ActiveEffect> {
+    val s = state.normalized()
+    val dynamics = status?.dynamics ?: true
+    return buildList {
+        if (dynamics && s.eqOn && s.gainsDb.any { it != 0f }) add(ActiveEffect.EQUALIZER)
+        if (dynamics && s.bassOn) add(ActiveEffect.BASS)
+        if (dynamics && s.loudnessOn) add(ActiveEffect.LOUDNESS)
+        if (s.virtualizerOn && status?.virtualizer != false) add(ActiveEffect.VIRTUALIZER)
+        if (s.reverb != ReverbRoom.NONE && status?.reverb != false) add(ActiveEffect.REVERB)
+        if (dynamics && s.balance != 0f) add(ActiveEffect.BALANCE)
+    }
+}
+
 data class SoundUi(
     val enabled: Boolean = false,
     val state: SoundState = SoundState(),
     val presets: List<Preset> = BUILT_IN_PRESETS,
     val profileLabel: ProfileLabel = ProfileLabel.Unsaved,
     val target: Target = Target.None,
+    val effects: List<ActiveEffect> = emptyList(),
+    /** How far Pegel lowers the level so that boosts stay clean; 0 when it does not. */
+    val headroomDb: Float = 0f,
     val notice: Notice? = null,
     val virtualizerAvailable: Boolean = true,
     val reverbAvailable: Boolean = true,
@@ -59,6 +86,8 @@ fun buildSoundUi(
         presets = BUILT_IN_PRESETS + customPresets,
         profileLabel = active?.let { ProfileLabel.Named(it.name, modified) } ?: ProfileLabel.Unsaved,
         target = engine.target,
+        effects = if (settings.enabled) activeEffects(state, status) else emptyList(),
+        headroomDb = if (settings.enabled && status?.dynamics != false) planFor(state, settings.tuning).headroomDb else 0f,
         notice = notice,
         virtualizerAvailable = status?.virtualizer ?: true,
         reverbAvailable = status?.reverb ?: true,

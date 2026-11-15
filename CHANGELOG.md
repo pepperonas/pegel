@@ -4,6 +4,43 @@ All notable changes to Pegel. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-11-15
+
+### Added
+
+- **A sound for each output, suggested.** When a new output becomes active, a card on the Sound tab
+  offers a fitting sound; one tap creates a profile for that device, binds it and loads it.
+  - **Headphones:** Pegel recognises about 6,000 models by their Bluetooth name and applies the
+    correction the [AutoEq](https://github.com/jaakkopasanen/AutoEq) project computed for Pegel's
+    ten bands, with the name of who measured it. Not recognised? Search the model by hand.
+  - **Speakers, cars, the phone's own speaker:** no open measurements exist for these. Pegel asks
+    once what the device is and offers its own starting curve for that kind — labelled as a
+    starting point, not a measurement.
+  - "Not now" is remembered per device; *Profiles › Devices › Suggest a sound…* brings the offer back.
+- **Nine more presets, in groups:** Techno, House, Drum & bass, Metal, R&B & soul, Lounge, and for
+  everything that is not music Film & series, Gaming and Night mode. The picker now sorts all 22
+  under *Tone*, *Music*, *Film, games, speech* and *Your own*.
+- No new permission: the device is recognised by the name Android already gives every app.
+- Help: where the suggested sound comes from, and Samsung's own sound effects running next to Pegel.
+
+### Fixed
+
+- **The volume no longer moves in waves when something is boosted.** Until now a limiter caught
+  every boosted peak and pulled the whole mix down with it — with more bass, on every kick. Pegel
+  now lowers the level in front by the largest boost of equalizer and bass, so the limiter has
+  nothing to do; it only remains as a safety net just below full scale (it used to start at −2 dB
+  and worked on loud tracks even with a flat sound). The price: a boosted sound is quieter than
+  before — the status card says by how many dB. Loudness still pushes into the limiter on purpose.
+
+### Changed
+
+- **The status says what is happening, in whole sentences.** Instead of "Global mix / Unsaved" the
+  card on the Sound tab now reads: what Pegel shapes ("everything this phone plays" or the named
+  player), the output in use, the sound ("profile “Rock”", "changed since", or "your own setting,
+  not saved as a profile") and the effects that actually change something right now — an equalizer
+  with every band at zero is not called active. The notification uses the same wording.
+- "Electronic" is now "Electro", "Speech" is "Speech & podcast".
+
 ## [1.0.1] - 2026-11-15
 
 ### Changed

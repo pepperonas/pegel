@@ -19,7 +19,8 @@ private const val PRE_EQ_BANDS = 2
  *  - post-EQ, ten bands → the equalizer
  *  - pre-EQ, two bands → bass (band 0 below the cutoff gets the boost, band 1 stays neutral)
  *  - input gain per channel → balance, plus the loudness gain
- *  - limiter → catches what EQ, bass and loudness push over full scale (no gain behind it)
+ *  - input gain also carries the headroom: the largest boost of EQ and bass is taken off in front
+ *  - limiter → a safety net just below full scale; only loudness pushes into it on purpose
  */
 class AndroidEffectChain private constructor(
     override val sessionId: Int,
@@ -118,7 +119,7 @@ class AndroidEffectChain private constructor(
         }
 
         /** inUse, enabled, linkGroup, attack ms, release ms, ratio, threshold dB, post gain dB. */
-        private val LIMITER = DynamicsProcessing.Limiter(true, true, 0, 1f, 60f, 10f, -2f, LIMITER_POST_GAIN_DB)
+        private val LIMITER = DynamicsProcessing.Limiter(true, true, 0, 1f, 60f, 10f, LIMITER_THRESHOLD_DB, LIMITER_POST_GAIN_DB)
 
         private fun presetOf(room: ReverbRoom): Short = when (room) {
             ReverbRoom.NONE -> PresetReverb.PRESET_NONE

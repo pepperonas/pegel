@@ -24,6 +24,10 @@ enum class NameError { EMPTY, DUPLICATE }
 class NameException(val error: NameError) : Exception(error.name)
 
 const val NAME_MAX = 40
+
+/** Stored in [DeviceEntity.suggestion]: the user took a suggestion / said "not now". */
+const val SUGGESTION_DONE = "done"
+const val SUGGESTION_DISMISSED = "dismissed"
 const val CUSTOM_PRESET_PREFIX = "custom:"
 
 /**
@@ -169,12 +173,46 @@ class SoundRepository private constructor(
     /** Remembers an output device so a profile can be bound to it; keeps an existing binding. */
     suspend fun seeDevice(key: String, label: String) = lock.withLock {
         val old = db.devices().byKey(key)
-        db.devices().upsert(DeviceEntity(key, label, old?.profileId, now()))
+        db.devices().upsert(DeviceEntity(key, label, old?.profileId, now(), old?.type, old?.suggestion))
     }
 
     suspend fun bindDevice(key: String, profileId: Long?) = lock.withLock {
         val old = db.devices().byKey(key)
-        db.devices().upsert(DeviceEntity(key, old?.label ?: key, profileId, old?.lastSeen ?: now()))
+        db.devices().upsert((old ?: DeviceEntity(key, key, null, now())).copy(profileId = profileId))
+    }
+
+    private suspend fun editDevice(key: String, label: String, change: (DeviceEntity) -> DeviceEntity) {
+        db.devices().upsert(change(db.devices().byKey(key) ?: DeviceEntity(key, label, null, now())))
+    }
+
+    /** What the user said the device is — a [io.celox.pegel.device.DeviceType] name. */
+    suspend fun setDeviceType(key: String, label: String, type: String?) = lock.withLock {
+        editDevice(key, label) { it.copy(type = type) }
+    }
+
+    /** "Not now": Pegel does not offer a sound for this device again on its own. */
+    suspend fun dismissSuggestion(key: String, label: String) = lock.withLock {
+        editDevice(key, label) { it.copy(suggestion = SUGGESTION_DISMISSED) }
+    }
+
+    /**
+     * Takes a suggested curve: a new profile that holds the curve and nothing else, bound to the
+     * device and loaded. A taken name gets a number — a suggestion must not fail on a name.
+     */
+    suspend fun applySuggestion(
+        key: String, label: String, profileName: String, gainsDb: List<Float>,
+        /** False for a device that is not the active output: its profile must not replace the sound in use. */
+        load: Boolean = true,
+    ): Long = lock.withLock {
+        val base = cleanName(profileName) ?: cleanName(label) ?: "Pegel"
+        var name = base
+        var n = 2
+        while (db.profiles().byName(name) != null) name = "${base.take(NAME_MAX - 4).trim()} ${n++}"
+        val state = SoundState(gainsDb = gainsDb, presetId = null).normalized()
+        val id = db.profiles().insert(ProfileEntity(name = name, stateJson = SoundStateJson.encode(state), updatedAt = now()))
+        editDevice(key, label) { it.copy(profileId = id, suggestion = SUGGESTION_DONE) }
+        if (load) setWorking(state, Profile(id, name, state))
+        id
     }
 
     suspend fun forgetDevice(key: String) = db.devices().delete(key)
@@ -190,7 +228,7 @@ class SoundRepository private constructor(
         BackupData(
             profiles = profiles.map { BackupProfile(it.name, it.state) },
             presets = db.presets().all().map { it.toPreset() }.map { BackupPreset(it.name, it.gainsDb) },
-            devices = db.devices().all().map { BackupDevice(it.key, it.label, names[it.profileId]) },
+            devices = db.devices().all().map { BackupDevice(it.key, it.label, names[it.profileId], it.type, it.suggestion) },
             settings = _settings.value,
             working = _state.value,
             activeProfile = _active.value?.name,
@@ -221,7 +259,7 @@ class SoundRepository private constructor(
                 db.presets().insert(PresetEntity(name = name, gainsJson = JSONArray().also { a -> gains.forEach { a.put(it.toDouble()) } }.toString()))
             }
             for (dev in d.devices) {
-                db.devices().upsert(DeviceEntity(dev.key, dev.label, dev.profile?.let { ids[it.trim().lowercase()] }, now))
+                db.devices().upsert(DeviceEntity(dev.key, dev.label, dev.profile?.let { ids[it.trim().lowercase()] }, now, dev.type, dev.suggestion))
             }
         }
         val settings = d.settings.normalized().copy(enabled = _settings.value.enabled)

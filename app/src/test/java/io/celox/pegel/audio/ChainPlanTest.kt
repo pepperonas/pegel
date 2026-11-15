@@ -61,6 +61,50 @@ class ChainPlanTest {
         assertEquals(0f, quiet.first); assertEquals(0f, quiet.second)
     }
 
+    // Field finding: with a boost the level came "in waves" — the limiter ducked the whole mix on
+    // every kick. Headroom in front means it has nothing to catch.
+    @Test
+    fun `a flat sound needs no headroom`() {
+        assertEquals(0f, planFor(SoundState(), tuning).headroomDb)
+        assertEquals(0f, planFor(SoundState(gainsDb = List(10) { -3f }), tuning).headroomDb)
+    }
+
+    @Test
+    fun `the largest boost is taken off in front, so nothing reaches the limiter`() {
+        val boosted = SoundState(gainsDb = listOf(0f, 0f, 0f, 0f, 0f, 4f, 6f, 0f, -3f, 0f))
+        val plan = planFor(boosted, tuning)
+        assertEquals(6f, plan.headroomDb)
+        assertEquals(-6f to -6f, inputGainsDb(plan))
+        assertEquals(0f, planFor(boosted.copy(eqOn = false), tuning).headroomDb)
+    }
+
+    @Test
+    fun `bass adds to the bands it lies under, not to the others`() {
+        // tuning: cutoff 80 Hz, 100 % = 15 dB → 7.5 dB at strength 0.5
+        val bass = SoundState(bassOn = true, bassStrength = 0.5f)
+        assertEquals(7.5f, planFor(bass, tuning).headroomDb)
+        // 31 Hz and 62 Hz lie under the bass shelf: their boost stacks on top of it
+        assertEquals(10.5f, planFor(bass.copy(gainsDb = listOf(3f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)), tuning).headroomDb)
+        assertEquals(9.5f, planFor(bass.copy(gainsDb = listOf(0f, 2f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)), tuning).headroomDb)
+        // 1 kHz does not: the larger of the two counts
+        assertEquals(7.5f, planFor(bass.copy(gainsDb = listOf(0f, 0f, 0f, 0f, 0f, 5f, 0f, 0f, 0f, 0f)), tuning).headroomDb)
+        assertEquals(9f, planFor(bass.copy(gainsDb = listOf(0f, 0f, 0f, 0f, 0f, 9f, 0f, 0f, 0f, 0f)), tuning).headroomDb)
+        // a cut under the shelf takes some of it back
+        assertEquals(4.5f, planFor(bass.copy(gainsDb = listOf(-3f, -3f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)), tuning).headroomDb)
+    }
+
+    @Test
+    fun `loudness is the one thing that still pushes into the limiter`() {
+        val plan = planFor(SoundState(gainsDb = List(10) { 4f }, loudnessOn = true, loudnessStrength = 0.3f), tuning)
+        assertEquals(4f, plan.headroomDb)
+        assertEquals(2f to 2f, inputGainsDb(plan)) // 6 dB loudness, 4 dB of it used up by the headroom
+    }
+
+    @Test
+    fun `the limiter is a safety net just below full scale, not part of the sound`() {
+        assertTrue(LIMITER_THRESHOLD_DB >= -1f && LIMITER_THRESHOLD_DB < 0f)
+    }
+
     @Test
     fun `balance turns the far side down and never the near side up`() {
         val centre = planFor(SoundState(balance = 0f), tuning)

@@ -219,6 +219,15 @@ fun presetLabel(preset: Preset): String {
         "acoustic" -> R.string.preset_acoustic
         "vshape" -> R.string.preset_vshape
         "speech" -> R.string.preset_speech
+        "techno" -> R.string.preset_techno
+        "house" -> R.string.preset_house
+        "dnb" -> R.string.preset_dnb
+        "metal" -> R.string.preset_metal
+        "rnb" -> R.string.preset_rnb
+        "lounge" -> R.string.preset_lounge
+        "movie" -> R.string.preset_movie
+        "gaming" -> R.string.preset_gaming
+        "night" -> R.string.preset_night
         else -> return preset.name
     }
     return stringResource(res)

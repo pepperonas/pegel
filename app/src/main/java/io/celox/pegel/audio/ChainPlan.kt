@@ -27,15 +27,39 @@ data class ChainPlan(
     /** 0..1000, or null when the virtualizer is off. */
     val virtualizerStrength: Int?,
     val reverb: ReverbRoom,
+    /**
+     * How far the level is lowered in front of everything, so that the largest boost of equalizer
+     * and bass ends at full scale instead of above it. Without it the limiter has to catch every
+     * boosted peak and ducks the whole mix each time — audible as the volume coming in waves.
+     */
+    val headroomDb: Float = 0f,
 )
+
+/**
+ * The largest boost equalizer and bass add anywhere in the spectrum. The bass shelf lies under the
+ * bands that begin below its cutoff, so their gains stack on it; the other bands stand alone.
+ */
+fun peakBoostDb(postEqGainsDb: List<Float>, bassCutoffHz: Float, bassGainDb: Float): Float {
+    var peak = 0f
+    for (i in postEqGainsDb.indices) {
+        val lowerEdge = if (i == 0) 0f else POST_EQ_CUTOFFS_HZ[i - 1]
+        val under = if (lowerEdge < bassCutoffHz) bassGainDb else 0f
+        peak = maxOf(peak, postEqGainsDb[i] + under)
+    }
+    return peak
+}
 
 fun planFor(state: SoundState, tuning: Tuning): ChainPlan {
     val s = state.normalized()
     val t = tuning.normalized()
+    val gains = if (s.eqOn) s.gainsDb else List(BAND_COUNT) { 0f }
+    val cutoff = t.bassCutoffHz.toFloat()
+    val bass = if (s.bassOn) s.bassStrength * t.bassMaxDb else 0f
     return ChainPlan(
-        postEqGainsDb = if (s.eqOn) s.gainsDb else List(BAND_COUNT) { 0f },
-        bassCutoffHz = t.bassCutoffHz.toFloat(),
-        bassGainDb = if (s.bassOn) s.bassStrength * t.bassMaxDb else 0f,
+        postEqGainsDb = gains,
+        bassCutoffHz = cutoff,
+        bassGainDb = bass,
+        headroomDb = peakBoostDb(gains, cutoff, bass),
         loudnessGainDb = if (s.loudnessOn) s.loudnessStrength * t.loudnessMaxDb else 0f,
         leftGainDb = if (s.balance > 0f) attenuation(s.balance) else 0f,
         rightGainDb = if (s.balance < 0f) attenuation(-s.balance) else 0f,
@@ -50,9 +74,18 @@ fun planFor(state: SoundState, tuning: Tuning): ChainPlan {
  */
 const val LIMITER_POST_GAIN_DB = 0f
 
-/** Input gain per channel (left, right): balance attenuation plus the loudness gain. */
-fun inputGainsDb(plan: ChainPlan): Pair<Float, Float> =
-    (plan.leftGainDb + plan.loudnessGainDb) to (plan.rightGainDb + plan.loudnessGainDb)
+/**
+ * Just below full scale: with the headroom taken off in front, equalizer and bass never reach it.
+ * It is a safety net (filter overshoot, loudness) — at -2 dB it worked on every loud track, even
+ * with a flat sound.
+ */
+const val LIMITER_THRESHOLD_DB = -0.5f
+
+/** Input gain per channel (left, right): balance attenuation plus the loudness gain, minus the headroom. */
+fun inputGainsDb(plan: ChainPlan): Pair<Float, Float> {
+    val common = plan.loudnessGainDb - plan.headroomDb
+    return (plan.leftGainDb + common) to (plan.rightGainDb + common)
+}
 
 /** Linear in amplitude: halfway to one side halves the other side (-6 dB). */
 private fun attenuation(amount: Float): Float =

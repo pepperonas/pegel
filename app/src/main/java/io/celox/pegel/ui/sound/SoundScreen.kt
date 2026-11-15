@@ -1,5 +1,11 @@
 package io.celox.pegel.ui.sound
 
+import io.celox.pegel.audio.presetGroup
+import io.celox.pegel.audio.PresetGroup
+import io.celox.pegel.ui.profiles.deviceLabel
+import io.celox.pegel.device.DeviceWatcher
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.runtime.remember
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -64,6 +70,7 @@ import io.celox.pegel.audio.Preset
 import io.celox.pegel.audio.Target
 import io.celox.pegel.container
 import io.celox.pegel.service.ServiceStarter
+import io.celox.pegel.ui.suggest.SuggestionBanner
 import io.celox.pegel.ui.update.UpdateBanner
 import io.celox.pegel.ui.common.NameDialog
 import io.celox.pegel.ui.common.appLabel
@@ -128,6 +135,7 @@ fun SoundScreen(onOpenProfiles: () -> Unit) {
             if (ui.enabled) StatusRow(ui, onOpenProfiles, onDetach = vm::detachPlayers) else OffHint()
             ui.notice?.let { NoticeBanner(it, onAllowNotifications = ::requestNotifications) }
             UpdateBanner()
+            SuggestionBanner()
 
             val s = ui.state
             EqCard(
@@ -189,33 +197,68 @@ fun SoundScreen(onOpenProfiles: () -> Unit) {
     }
 }
 
-/** Where Pegel is attached and which profile is playing — tapping leads to the profiles. */
+/**
+ * What Pegel is doing right now, in whole sentences: what it shapes, through which output, with
+ * which sound, and which effects actually change something. Tapping leads to the profiles.
+ */
 @Composable
 private fun StatusRow(ui: SoundUi, onOpenProfiles: () -> Unit, onDetach: () -> Unit) {
     val context = LocalContext.current
+    val watcher = remember { DeviceWatcher(context) }
+    val output by watcher.active.collectAsStateWithLifecycle(initialValue = watcher.current())
     val target = when (val t = ui.target) {
         Target.GlobalMix -> stringResource(R.string.target_global)
-        is Target.Players -> t.packages.joinToString { appLabel(context, it) }
+        is Target.Players -> stringResource(R.string.target_players, t.packages.joinToString { appLabel(context, it) })
         Target.None -> stringResource(if (ui.notice == Notice.ENGINE_FAILED) R.string.target_failed else R.string.target_waiting)
     }
-    val profile = when (val p = ui.profileLabel) {
-        ProfileLabel.Unsaved -> stringResource(R.string.profile_unsaved)
-        is ProfileLabel.Named -> if (p.modified) stringResource(R.string.profile_modified, p.name) else p.name
+    val sound = when (val p = ui.profileLabel) {
+        ProfileLabel.Unsaved -> stringResource(R.string.status_sound_unsaved)
+        is ProfileLabel.Named ->
+            stringResource(if (p.modified) R.string.status_sound_modified else R.string.status_sound_profile, p.name)
     }
+    val names = ui.effects.map {
+        stringResource(
+            when (it) {
+                ActiveEffect.EQUALIZER -> R.string.card_equalizer
+                ActiveEffect.BASS -> R.string.card_bass
+                ActiveEffect.LOUDNESS -> R.string.card_loudness
+                ActiveEffect.VIRTUALIZER -> R.string.card_virtualizer
+                ActiveEffect.REVERB -> R.string.card_reverb
+                ActiveEffect.BALANCE -> R.string.card_balance
+            }
+        )
+    }
+    val effects = if (names.isEmpty()) stringResource(R.string.status_effects_none)
+    else stringResource(R.string.status_effects, names.joinToString(", "))
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = MaterialTheme.shapes.large,
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenProfiles),
+        modifier = Modifier.fillMaxWidth().clickable(onClickLabel = stringResource(R.string.status_open_profiles), onClick = onOpenProfiles),
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(target, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(profile, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(target, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                output?.let {
+                    Text(
+                        stringResource(R.string.status_output, deviceLabel(it.name, it.kind)),
+                        style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Text(sound, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(effects, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (ui.headroomDb > 0f) {
+                    Text(
+                        stringResource(R.string.status_headroom, formatDb(ui.headroomDb)),
+                        style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             // A killed player never closes its session and Android does not report it: the way out.
             if (ui.target is Target.Players) {
                 TextButton(onClick = onDetach) { Text(stringResource(R.string.sound_detach)) }
+            } else {
+                Icon(Icons.Rounded.ChevronRight, contentDescription = null)
             }
         }
     }
@@ -273,7 +316,22 @@ private fun PresetSheet(
         // The sheet draws edge to edge, and on older Android its window reports no insets at all:
         // generous bottom padding keeps the last preset clear of the navigation bar either way.
         LazyColumn(Modifier.navigationBarsPadding(), contentPadding = PaddingValues(bottom = 72.dp)) {
-            items(presets, key = { it.id }) { preset ->
+            presets.groupBy { presetGroup(it) }.toSortedMap().forEach { (group, inGroup) ->
+            item(key = "group:$group") {
+                Text(
+                    stringResource(
+                        when (group) {
+                            PresetGroup.TONE -> R.string.presets_group_tone
+                            PresetGroup.MUSIC -> R.string.presets_group_music
+                            PresetGroup.MEDIA -> R.string.presets_group_media
+                            PresetGroup.OWN -> R.string.presets_group_own
+                        }
+                    ),
+                    style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 4.dp),
+                )
+            }
+            items(inGroup, key = { it.id }) { preset ->
                 val label = presetLabel(preset)
                 ListItem(
                     headlineContent = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -292,6 +350,11 @@ private fun PresetSheet(
                     modifier = Modifier.clickable { onSelect(preset.id) },
                 )
             }
+            }
         }
     }
 }
+
+/** "6" or "7.5" — a level in dB without a pointless ".0". */
+private fun formatDb(db: Float): String =
+    if (db % 1f == 0f) db.toInt().toString() else String.format(java.util.Locale.getDefault(), "%.1f", db)

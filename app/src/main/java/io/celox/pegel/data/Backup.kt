@@ -14,7 +14,10 @@ data class BackupProfile(val name: String, val state: SoundState)
 data class BackupPreset(val name: String, val gainsDb: List<Float>)
 
 /** [profile] is the *name* of the bound profile — row ids mean nothing on another phone. */
-data class BackupDevice(val key: String, val label: String, val profile: String?)
+data class BackupDevice(
+    val key: String, val label: String, val profile: String?,
+    val type: String? = null, val suggestion: String? = null,
+)
 
 data class BackupData(
     val profiles: List<BackupProfile>,
@@ -70,7 +73,12 @@ object BackupCodec {
             }
         })
         put("devices", JSONArray().also { a ->
-            d.devices.forEach { a.put(JSONObject().put("key", it.key).put("label", it.label).put("profile", it.profile ?: JSONObject.NULL)) }
+            d.devices.forEach { 
+                val o = JSONObject().put("key", it.key).put("label", it.label).put("profile", it.profile ?: JSONObject.NULL)
+                it.type?.let { t -> o.put("type", t) }
+                it.suggestion?.let { s -> o.put("suggestion", s) }
+                a.put(o)
+            }
         })
     }.toString(2)
 
@@ -86,7 +94,7 @@ object BackupCodec {
             },
             devices = objects(o.optJSONArray("devices")).mapNotNull { d ->
                 val key = d.optString("key").takeIf { it.isNotBlank() } ?: return@mapNotNull null
-                BackupDevice(key, d.optString("label"), text(d, "profile"))
+                BackupDevice(key, d.optString("label"), text(d, "profile"), text(d, "type"), text(d, "suggestion"))
             },
             settings = Settings(
                 enabled = s.optBoolean("enabled", def.enabled),

@@ -1,5 +1,7 @@
 package io.celox.pegel.ui.profiles
 
+import io.celox.pegel.ui.suggest.SuggestionDialog
+import io.celox.pegel.device.OutputDevice
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -279,6 +281,7 @@ private fun ProfileItem(row: ProfileRow, onLoad: () -> Unit, onShare: () -> Unit
 @Composable
 private fun DeviceItem(device: DeviceRow, profiles: List<Profile>, onBind: (Long?) -> Unit, onForget: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
+    var suggesting by remember { mutableStateOf(false) }
     val label = deviceLabel(device.label, device.kind)
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -316,6 +319,10 @@ private fun DeviceItem(device: DeviceRow, profiles: List<Profile>, onBind: (Long
                 }
             }
         }
+        TextButton(onClick = { suggesting = true }) { Text(stringResource(R.string.devices_suggest)) }
+    }
+    if (suggesting) {
+        SuggestionDialog(OutputDevice(device.kind, device.label), active = device.connected, onClose = { suggesting = false })
     }
 }
 

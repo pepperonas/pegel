@@ -1,5 +1,7 @@
 package io.celox.pegel.data
 
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
@@ -49,6 +51,10 @@ data class DeviceEntity(
     val label: String,
     val profileId: Long?,
     val lastSeen: Long,
+    /** A [io.celox.pegel.device.DeviceType] name once the user said what the device is. */
+    val type: String? = null,
+    /** "done" or "dismissed" once the user answered Pegel's suggestion for this device. */
+    val suggestion: String? = null,
 )
 
 @Dao
@@ -88,11 +94,23 @@ interface DeviceDao {
 
 @Database(
     entities = [ProfileEntity::class, PresetEntity::class, DeviceEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class PegelDatabase : RoomDatabase() {
     abstract fun profiles(): ProfileDao
     abstract fun presets(): PresetDao
     abstract fun devices(): DeviceDao
+
+    companion object {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE devices ADD COLUMN type TEXT")
+                db.execSQL("ALTER TABLE devices ADD COLUMN suggestion TEXT")
+            }
+        }
+
+        /** Every step from the first shipped version on — a user's profiles must survive an update. */
+        val MIGRATIONS = arrayOf<Migration>(MIGRATION_1_2)
+    }
 }

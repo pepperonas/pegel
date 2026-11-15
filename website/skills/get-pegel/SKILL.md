@@ -6,7 +6,7 @@ license: MIT
 
 # Get Pegel
 
-Pegel is a free, open-source (MIT) system equalizer for Android 9 and later. It offers a ten-band equalizer (31 Hz to 16 kHz, ±12 dB in 0.5 dB steps) with a live response curve, 13 presets and your own presets, plus bass boost, loudness, a virtualizer, optional reverb and left/right balance. The whole sound can be saved as a profile, and each output — speaker, wired headphones, USB audio, each Bluetooth device — can have its own profile that Pegel applies when that output becomes active. Pegel does not process audio itself: it configures Android's own effects (DynamicsProcessing, Virtualizer, PresetReverb) on the global mix and on the audio sessions that music players announce, so it works without root and within the limits Android sets — apps that neither announce their session nor play through the global mix are not reached. Profiles, presets and settings can be backed up to one JSON file, and single profiles shared as .pegel files. There are no ads, no tracking and no account; the only network access is the update check, which can be switched off, and the checksum-verified update the app installs itself. Distributed as a signed APK through GitHub Releases.
+Pegel is a free, open-source (MIT) system equalizer for Android 9 and later. It offers a ten-band equalizer (31 Hz to 16 kHz, ±12 dB in 0.5 dB steps) with a live response curve, 22 presets and your own presets, plus bass boost, loudness, a virtualizer, optional reverb and left/right balance. The whole sound can be saved as a profile, and each output — speaker, wired headphones, USB audio, each Bluetooth device — can have its own profile that Pegel applies when that output becomes active. Pegel does not process audio itself: it configures Android's own effects (DynamicsProcessing, Virtualizer, PresetReverb) on the global mix and on the audio sessions that music players announce, so it works without root and within the limits Android sets — apps that neither announce their session nor play through the global mix are not reached. Profiles, presets and settings can be backed up to one JSON file, and single profiles shared as .pegel files. There are no ads, no tracking and no account; the only network access is the update check, which can be switched off, and the checksum-verified update the app installs itself. Distributed as a signed APK through GitHub Releases.
 
 ## 1. Find the newest release
 
@@ -35,6 +35,7 @@ page itself, browsers with WebMCP expose the same data as the tools `get_latest_
 ## Limits
 
 - Android 9 or later only; not on Google Play — distributed as an APK through GitHub Releases.
+- Only headphones have measured corrections. Suggested curves for speakers, cars and the phone speaker are starting points by kind of device, not measurements.
 - No root: Pegel reaches only audio that plays through the global mix or through a session a player announces. Apps with their own audio engine or copy protection may not be affected.
 - Whether effects on the global mix are allowed depends on the device.
 - Reverb works only on a player's own session, not on the global mix.

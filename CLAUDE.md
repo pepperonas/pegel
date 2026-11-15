@@ -92,6 +92,39 @@ bump shows up at the worst moment. `tests.yml` runs on every push and pull reque
   pending changes into the next version's section.
 - Follow-ups: a share link for profiles, a legacy effect path for Android 8.
 
+## Sound suggestions (1.1.0)
+
+When an output becomes active and has neither a profile nor an answer, the Sound tab offers a
+sound (`ui/suggest/`, decisions in `suggestionFor`): a measured correction for headphones the table
+knows, otherwise a question what the device is and Pegel's own starting curve for that kind
+(`device/StartCurves.kt`). Taking it creates a profile, binds it, loads it (`applySuggestion`).
+
+- `app/src/main/assets/headphones.tsv` is generated: `python3 scripts/autoeq.py` reads AutoEq at
+  the commit pinned in the script (blobless sparse clone into `build/autoeq`) and also writes
+  `docs/AUTOEQ-NOTICE.md`. Never edit either by hand. The measurement data has no licence of its
+  own (user decision 2026-11-15: ship it, name the sources).
+- **No match is better than a wrong one** (`HeadphoneCatalog.match`): only whole names count, and
+  the test with the real device names of the developer's phone guards it. Android gives an app
+  without the Bluetooth permission the name only — no device class, no codec — hence the question.
+- **There are no measurements for speakers, cars or phone speakers.** The start curves are Pegel's
+  own and the UI says "starting point, not a measurement". Do not add per-model speaker curves
+  that look measured.
+- The card must not wait for the table: `suggestionFor(…, catalog = null)` offers what does not
+  need it. Parsing takes seconds on a slow device.
+- Room is at version 2 (`devices.type`, `devices.suggestion`); `MigrationTest` builds version 1 from
+  the checked-in schema. Every schema change needs a migration in `PegelDatabase.MIGRATIONS`.
+- Verified on the emulator: card, apply, the dialog from the device row, update from 1.0.1. **Not
+  verified:** anything with a Bluetooth device (the emulator has none) — recognition by name, the
+  type question and the model search have only their unit tests.
+
+## Status wording (1.1.0)
+
+The status card and the notification speak in whole sentences (user finding: "Global mix / Unsaved"
+told him nothing): what is shaped, the output, the sound, and the effects that change something
+right now (`activeEffects` — switched on is not the same as doing something). Keep new status
+texts in that form; no bare labels. Presets are grouped (`presetGroup`); a new built-in preset
+needs its id in `Presets.kt`, both `strings.xml` and `presetLabel` — `PresetsTest` checks all three.
+
 ## Icon and artwork
 
 `python3 scripts/icon.py` writes the adaptive-icon layers, the themed layer, the status-bar icon and
@@ -172,6 +205,11 @@ UI (Compose) ──update()──▶ SoundRepository ──state/settings──�
   the tests up to date and the guards silently do not run.
 - **A red baseline makes a mutation check worthless.** The badge guard fails whenever the test count
   changes; run `scripts/update-badges.py` and see green before mutating, and list *which* test failed.
+- **Headroom, not the limiter, keeps boosts clean.** `planFor` lowers the input gain by the largest
+  boost of equalizer and bass (`peakBoostDb`); the limiter (`LIMITER_THRESHOLD_DB`, -0.5 dB) is only
+  a safety net. Field finding 2026-11-15: at -2 dB and without headroom it ducked the whole mix on
+  every kick — "the volume comes in waves". Do not trade the headroom for loudness; the status
+  card shows it instead. Not verified by ear or measurement.
 - **No reverb on the global mix.** There it is an auxiliary effect and would be a switch that does
   nothing, so the chain reports it unavailable and the card says why.
 - **The update switch lives in `UpdateCheckStore`**, not in `Settings` — the worker reads it

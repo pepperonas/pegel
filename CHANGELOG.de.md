@@ -4,6 +4,46 @@ Alle nennenswerten Änderungen an Pegel. Format nach
 [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach
 [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.1.0] - 2026-11-15
+
+### Neu
+
+- **Ein Klang für jede Ausgabe, vorgeschlagen.** Wird eine neue Ausgabe aktiv, bietet eine Karte im
+  Tab Klang einen passenden Klang an; ein Tipp legt ein Profil für dieses Gerät an, bindet und lädt es.
+  - **Kopfhörer:** Pegel erkennt rund 6.000 Modelle am Bluetooth-Namen und wendet die Korrektur an,
+    die das Projekt [AutoEq](https://github.com/jaakkopasanen/AutoEq) für Pegels zehn Bänder
+    berechnet hat, samt dem Namen dessen, der gemessen hat. Nicht erkannt? Das Modell von Hand suchen.
+  - **Lautsprecher, Autos, der Lautsprecher des Handys:** dafür gibt es keine offenen Messungen.
+    Pegel fragt einmal, was das Gerät ist, und bietet eine eigene Startkurve für diese Art an —
+    als Ausgangspunkt beschriftet, nicht als Messung.
+  - „Nicht jetzt“ merkt sich Pegel je Gerät; *Profile › Geräte › Klang vorschlagen…* holt das
+    Angebot zurück.
+- **Neun weitere Presets, in Gruppen:** Techno, House, Drum & Bass, Metal, R&B & Soul, Lounge und
+  für alles, was keine Musik ist, Film & Serie, Gaming und Nachtmodus. Die Auswahl ordnet alle 22
+  unter *Klangfarbe*, *Musik*, *Film, Spiele, Sprache* und *Eigene*.
+- Keine neue Berechtigung: erkannt wird am Namen, den Android ohnehin jeder App nennt.
+- Hilfe: woher der vorgeschlagene Klang kommt, und Samsungs eigene Klangeffekte neben Pegel.
+
+### Behoben
+
+- **Die Lautstärke schwankt nicht mehr in Wellen, wenn etwas angehoben ist.** Bisher fing ein
+  Begrenzer jede angehobene Spitze ab und zog dabei den ganzen Mix herunter — mit mehr Bass bei
+  jedem Schlag. Pegel senkt den Pegel jetzt vorab um die größte Anhebung von Equalizer und Bass,
+  sodass der Begrenzer nichts mehr zu tun hat; er bleibt nur als Sicherheitsnetz knapp unter
+  Vollaussteuerung (früher griff er ab −2 dB und arbeitete bei lauten Titeln sogar mit neutralem
+  Klang). Der Preis: ein angehobener Klang ist leiser als vorher — die Statuskarte sagt, um wie
+  viele dB. Loudness drückt weiterhin absichtlich in den Begrenzer.
+
+### Geändert
+
+- **Der Status sagt in ganzen Sätzen, was passiert.** Statt „Globaler Mix / Ungespeichert“ steht
+  auf der Karte im Tab Klang jetzt: was Pegel formt („alles, was das Handy abspielt“ oder der
+  genannte Player), die Ausgabe, der Klang („Profil ‚Rock‘“, „seither geändert“ oder „eigene
+  Einstellung, nicht als Profil gespeichert“) und die Effekte, die gerade wirklich etwas ändern —
+  ein Equalizer mit allen Bändern auf null gilt nicht als aktiv. Die Benachrichtigung nutzt
+  dieselben Worte.
+- „Elektronisch“ heißt jetzt „Elektro“, „Sprache“ heißt „Sprache & Podcast“.
+
 ## [1.0.1] - 2026-11-15
 
 ### Geändert

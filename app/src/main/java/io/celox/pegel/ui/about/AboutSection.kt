@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Description
@@ -200,7 +201,13 @@ fun AboutSection(onOpenFailed: () -> Unit) {
         LinkChip(stringResource(R.string.about_link_source), Icons.Outlined.Code) { open(AboutLinks.REPO_URL) }
         LinkChip(stringResource(R.string.about_link_changelog), Icons.Outlined.History) { open(AboutLinks.CHANGELOG_URL) }
         LinkChip(AboutLinks.LICENSE_NAME, Icons.Outlined.Description) { open(AboutLinks.LICENSE_URL) }
+        LinkChip(AboutLinks.AUTOEQ_LABEL, Icons.Outlined.Headphones) { open(AboutLinks.AUTOEQ_URL) }
     }
+    Text(
+        stringResource(R.string.about_autoeq),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     Text(
         stringResource(R.string.about_license, AboutLinks.LICENSE_NAME),
         style = MaterialTheme.typography.bodySmall,

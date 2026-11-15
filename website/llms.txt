@@ -1,6 +1,6 @@
 # Pegel
 
-> Pegel is a free, open-source (MIT) system equalizer for Android 9 and later. It offers a ten-band equalizer (31 Hz to 16 kHz, ±12 dB in 0.5 dB steps) with a live response curve, 13 presets and your own presets, plus bass boost, loudness, a virtualizer, optional reverb and left/right balance. The whole sound can be saved as a profile, and each output — speaker, wired headphones, USB audio, each Bluetooth device — can have its own profile that Pegel applies when that output becomes active. Pegel does not process audio itself: it configures Android's own effects (DynamicsProcessing, Virtualizer, PresetReverb) on the global mix and on the audio sessions that music players announce, so it works without root and within the limits Android sets — apps that neither announce their session nor play through the global mix are not reached. Profiles, presets and settings can be backed up to one JSON file, and single profiles shared as .pegel files. There are no ads, no tracking and no account; the only network access is the update check, which can be switched off, and the checksum-verified update the app installs itself. Distributed as a signed APK through GitHub Releases.
+> Pegel is a free, open-source (MIT) system equalizer for Android 9 and later. It offers a ten-band equalizer (31 Hz to 16 kHz, ±12 dB in 0.5 dB steps) with a live response curve, 22 presets and your own presets, plus bass boost, loudness, a virtualizer, optional reverb and left/right balance. The whole sound can be saved as a profile, and each output — speaker, wired headphones, USB audio, each Bluetooth device — can have its own profile that Pegel applies when that output becomes active. Pegel does not process audio itself: it configures Android's own effects (DynamicsProcessing, Virtualizer, PresetReverb) on the global mix and on the audio sessions that music players announce, so it works without root and within the limits Android sets — apps that neither announce their session nor play through the global mix are not reached. Profiles, presets and settings can be backed up to one JSON file, and single profiles shared as .pegel files. There are no ads, no tracking and no account; the only network access is the update check, which can be switched off, and the checksum-verified update the app installs itself. Distributed as a signed APK through GitHub Releases.
 
 Everything below is also available without JavaScript: the page's HTML carries the current version and checksums, and `/` returns Markdown for `Accept: text/markdown`.
 
@@ -31,7 +31,7 @@ Everything below is also available without JavaScript: the page's HTML carries t
 
 ## Features
 
-- Ten bands, half-decibel steps: From 31 Hz to 16 kHz, ±12 dB each, with a curve above the sliders that shows what you are doing. 13 presets to start from, and your own next to them.
+- Ten bands, half-decibel steps: From 31 Hz to 16 kHz, ±12 dB each, with a curve above the sliders that shows what you are doing. 22 presets to start from, and your own next to them.
 - Bass, loudness, virtualizer: Each with one strength slider. Loudness pushes its gain into a limiter, so a boost gets denser instead of clipping. Reverb and balance are there when you want them.
 - Profiles that follow your headphones: Save the whole sound under a name and give each output its own: speaker, wired, USB, every Bluetooth device. Plug in or connect, and Pegel loads the right one.
 - Honest about what it reaches: Without root, an equalizer reaches the global mix and the players that announce their audio. Pegel uses both, and one line at the top always says what it is attached to right now.
@@ -41,6 +41,7 @@ Everything below is also available without JavaScript: the page's HTML carries t
 ## Scope and limits
 
 - Android 9 or later only; not on Google Play — distributed as an APK through GitHub Releases.
+- Only headphones have measured corrections. Suggested curves for speakers, cars and the phone speaker are starting points by kind of device, not measurements.
 - No root: Pegel reaches only audio that plays through the global mix or through a session a player announces. Apps with their own audio engine or copy protection may not be affected.
 - Whether effects on the global mix are allowed depends on the device.
 - Reverb works only on a player's own session, not on the global mix.

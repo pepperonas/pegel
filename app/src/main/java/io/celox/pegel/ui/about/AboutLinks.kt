@@ -14,6 +14,8 @@ object AboutLinks {
     const val PRODUCT_LABEL = "pegel.celox.io"
     const val PRODUCT_URL = "https://pegel.celox.io"
     const val REPO_URL = "https://github.com/pepperonas/pegel"
+    const val AUTOEQ_LABEL = "AutoEq"
+    const val AUTOEQ_URL = "https://github.com/jaakkopasanen/AutoEq"
     const val LICENSE_NAME = "MIT License"
     const val LICENSE_URL = "$REPO_URL/blob/main/LICENSE"
     const val CHANGELOG_URL = "$REPO_URL/blob/main/CHANGELOG.md"
