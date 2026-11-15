@@ -8,10 +8,10 @@ Pegel (`io.celox.pegel`) is an open-source (MIT) system equalizer for Android: a
 bass boost, loudness, virtualizer, optional reverb and balance, profiles, and a profile per output
 device. It does not process audio itself — it configures Android's own effects
 (`android.media.audiofx`) on audio sessions. No ads, no tracking, no account; `INTERNET` exists for
-one thing only, the opt-in update check (off by default).
+one thing only: the update check (on unless switched off) and the update it downloads.
 
 Repository: `github.com/pepperonas/pegel` (public, MIT). Distribution is GitHub Releases only — not
-Google Play.
+Google Play. Product page: <https://pegel.celox.io> (source in `website/`, see below).
 
 Single Gradle module (`:app`), Kotlin + Jetpack Compose (Material 3 Expressive), minSdk 28 /
 target+compile 35, JDK 17. minSdk is 28 rather than the house default 26 because
@@ -62,16 +62,17 @@ bump shows up at the worst moment. `tests.yml` runs on every push and pull reque
 
 ## Status (2026-11-15)
 
+- **v1.0.0 is released** (2026-11-15) and is what `pegel.celox.io/download` serves.
 - Built and accepted on an emulator with Android 9: service, global mix, player sessions, reboot,
-  app update, backup round trip, both languages, both themes.
-- **No release tag yet.** `v1.0.0` waits for a listening test on a real phone. Before tagging, set
-  the date of the `## [1.0.0]` section in both changelogs to the day of the tag.
-- Installed on a real phone (Android 17) as the signed release build; nothing has been verified
-  there yet. Open questions only real hardware answers:
+  app update, backup round trip, both languages, both themes — and the in-app update end to end
+  (a signed 0.9.0 test build found 1.0.0 on the page, downloaded, verified, asked for the install
+  permission, continued by itself, installed, and posted "updated to 1.0.0").
+- **Nothing has been verified by ear on a real phone.** Open questions only real hardware answers:
   - Do the 31 Hz and 62 Hz bands act separately at the default 10 ms block? If not, raise the
     default block size (`Settings.frameDurationMs`) — it trades latency for bass resolution.
   - Does loudness stay clean now that its gain sits in front of the limiter?
-  - The Android 12+ paths: refused foreground-service start, sticky restart, notification permission.
+  - The Android 12+ paths: refused foreground-service start, sticky restart, notification permission,
+    and the installer's `USER_ACTION_NOT_REQUIRED` path.
   - Auto-apply with Bluetooth devices (only the speaker was exercised on the emulator).
 - Known and deliberately left: a restore interrupted by a configuration change in the few
   milliseconds between the database commit and the settings write can leave new profiles with old
@@ -80,8 +81,31 @@ bump shows up at the worst moment. `tests.yml` runs on every push and pull reque
 - The release APK is ~50 MB because `isMinifyEnabled = false` ships all of
   `material-icons-extended`. Turning R8 on would shrink it to a few MB but needs a full pass over
   the app first (Room, WorkManager, reflection in the update check).
-- Follow-ups, not part of 1.0.0: product page `pegel.celox.io`, a share link for profiles, a legacy
-  effect path for Android 8.
+- The settings screenshots in `docs/screenshots/` still show the old icon in the About card.
+- Not in a release yet: the `pegel.celox.io` chip in the About section and the README links to the
+  page. The changelog has no "Unreleased" section (`ChangelogTest` wants every section dated) — put
+  them into the next version's section.
+- Follow-ups: a share link for profiles, a legacy effect path for Android 8.
+
+## Icon and artwork
+
+`python3 scripts/icon.py` writes the adaptive-icon layers, the themed layer, the status-bar icon and
+`docs/icon.svg` / `docs/mark.svg` from one computed geometry (five level bars, an amber peak-hold cap).
+`python3 scripts/art.py` renders `docs/banner.webp` and `docs/hero.png` (needs Chrome and `cwebp`).
+Never edit the generated drawables by hand.
+
+## Product page
+
+`website/` is built with the product-page kit (`~/claude/_templates/apps/product-page`): texts in
+`website/site.json` (five languages), then
+`python3 $K/build.py website/site.json website --hero docs/hero.png --screens <strip.png> --icon docs/mark.svg --force`
+and `./website/deploy.sh` (`server` also installs the release timer and the vhost; `"tls": "wildcard"`
+uses the VPS's `*.celox.io` certificate, so there is no DNS or certbot step). A timer on the VPS
+mirrors the newest GitHub release every 15 minutes into `latest.json`, `/files/` and `/download` —
+**a release updates the page by itself**. The app depends on that file: `ReleaseSource.SITE_URL`
+reads `version`, `name`, `url`, `size`, `sha256` from it, and `ApkReleaseParser` only accepts
+`https://pegel.celox.io/files/…` or GitHub release URLs. Do not rename the release asset
+(`pegel-vX.Y.Z.apk`) or move `/files/` without changing both.
 
 ## Architecture (data flow)
 
@@ -145,7 +169,12 @@ UI (Compose) ──update()──▶ SoundRepository ──state/settings──�
 - **No reverb on the global mix.** There it is an auxiliary effect and would be a switch that does
   nothing, so the chain reports it unavailable and the card says why.
 - **The update switch lives in `UpdateCheckStore`**, not in `Settings` — the worker reads it
-  synchronously, and consent does not belong in a backup file.
+  synchronously, and it does not belong in a backup file. It is on by default (user decision
+  2026-11-15); off means no work is enqueued and nothing is asked (`UpdatePolicy`, pinned).
+- **The in-app update never installs an unverified file.** `UpdateInstaller` downloads into the
+  cache, compares the SHA-256 with the one the source published and deletes a mismatch; Android then
+  checks the signature. `PegelApp` wraps the scheduling in `runCatching` — Robolectric has no
+  WorkManager, and a failed schedule must not stop the app.
 - **A restore never changes the master switch.** Reading a file must not start a service.
 - **`startForeground` is wrapped** (`ServiceStarter.promote`): Android 12+ can refuse it on a sticky
   restart in the background. And the activity acts on its launch intent only once (`isFreshLaunch`),
@@ -158,5 +187,3 @@ UI (Compose) ──update()──▶ SoundRepository ──state/settings──�
   (`ChainStatus` → `SoundUi`) instead of offering a dead switch.
 - **Mutation-check new assertions.** A test that was never seen failing is not an assurance; two of
   the blind spots found while building 1.0.0 were dead code, two were real gaps.
-- The product page (`pegel.celox.io`) and a share link for profiles are a follow-up; until the page
-  exists the About section has no product-page chip and the update check asks GitHub directly.

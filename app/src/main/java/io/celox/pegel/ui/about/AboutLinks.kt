@@ -11,6 +11,7 @@ object AboutLinks {
     const val AUTHOR = "Martin Pfeffer"
     const val WEBSITE_LABEL = "celox.io"
     const val WEBSITE_URL = "https://celox.io"
+    const val PRODUCT_LABEL = "pegel.celox.io"
     const val PRODUCT_URL = "https://pegel.celox.io"
     const val REPO_URL = "https://github.com/pepperonas/pegel"
     const val LICENSE_NAME = "MIT License"

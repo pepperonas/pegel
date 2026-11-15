@@ -65,7 +65,7 @@ def hero():
 <rect width="{W}" height="{H}" fill="{BG}"/>
 <ellipse cx="800" cy="800" rx="1150" ry="800" fill="url(#glow)"/>
 <ellipse cx="1150" cy="330" rx="520" ry="360" fill="url(#amber)"/>
-{meter(170, 210, 1280, 1010, 16, 0.46)}
+{meter(150, 210, 1040, 1010, 14, 0.46)}
 {mark(1740, 930, 250)}
 <text x="2040" y="1090" style="{FONT};font-weight:700;font-size:232px;letter-spacing:-6px" fill="#EEF1E6">Pegel</text>
 <text x="2046" y="1190" style="{FONT};font-weight:400;font-size:70px" fill="#B9C2AE">Shape what you hear.</text>

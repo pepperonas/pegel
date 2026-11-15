@@ -1,0 +1,482 @@
+{
+ "$comment": "Pegel product page — built with the product-page kit (~/claude/_templates/apps/product-page). Change texts here, then run build.py --force.",
+ "name": "Pegel",
+ "slug": "pegel",
+ "aliases": [],
+ "repo": "pepperonas/pegel",
+ "branch": "main",
+ "tagline": "Shape what you hear.",
+ "license": "MIT",
+ "tls": "wildcard",
+ "year": 2026,
+ "asset_version": 1,
+ "theme_source": "app/src/main/java/io/celox/pegel/ui/theme/Color.kt — the app's dark scheme (signal green on graphite, amber where the meter peaks)",
+ "theme": {
+  "bg": "#11140E",
+  "bg-lowest": "#0B0F09",
+  "surface-low": "#191D16",
+  "surface": "#1D211A",
+  "surface-high": "#272B24",
+  "surface-highest": "#32362E",
+  "on-bg": "#E1E4D9",
+  "on-variant": "#C3C8BB",
+  "outline": "#8D9387",
+  "outline-variant": "#43483E",
+  "primary": "#A0D57B",
+  "on-primary": "#153800",
+  "primary-container": "#245103",
+  "on-primary-container": "#BBF294",
+  "secondary-container": "#3E4A35",
+  "on-secondary-container": "#D9E7CA",
+  "tertiary": "#F5BF48",
+  "accent": "#7DBB55"
+ },
+ "hero": {
+  "bg": "#0D100B",
+  "width": 2912,
+  "height": 1440
+ },
+ "screens": {
+  "width": 1748,
+  "height": 1143
+ },
+ "ld": {
+  "type": "MobileApplication",
+  "category": "MultimediaApplication",
+  "subcategory": "Equalizer",
+  "os": "Android 9 or later"
+ },
+ "targets": [
+  {
+   "id": "android",
+   "label": "Download APK",
+   "short": "APK",
+   "asset": "^pegel-v[0-9][0-9A-Za-z.\\-]*\\.apk$",
+   "requirement": "Android 9+",
+   "ua": "android"
+  }
+ ],
+ "chips": [
+  {
+   "label": "Speaker",
+   "color": "#A0D57B"
+  },
+  {
+   "label": "Wired headphones",
+   "color": "#BBF294"
+  },
+  {
+   "label": "USB audio",
+   "color": "#7DBB55"
+  },
+  {
+   "label": "Bluetooth",
+   "color": "#F5BF48"
+  }
+ ],
+ "verify_rows": [
+  {
+   "label": {
+    "en": "Signing certificate SHA-256",
+    "de": "SHA-256 des Signaturzertifikats",
+    "es": "SHA-256 del certificado de firma",
+    "it": "SHA-256 del certificato di firma",
+    "fr": "SHA-256 du certificat de signature"
+   },
+   "value": "aa27ac4c8a8580905c0963cc362b943409fca43618dd1fabc0daf876ced8e282"
+  }
+ ],
+ "repo_stats": {
+  "path": ".github/repo-stats.json",
+  "items": [
+   {
+    "key": "loc_main",
+    "format": "k",
+    "detail": "{loc_test:k} of test code",
+    "label": {
+     "en": "Lines of Kotlin",
+     "de": "Zeilen Kotlin",
+     "es": "Líneas de Kotlin",
+     "it": "Righe di Kotlin",
+     "fr": "Lignes de Kotlin"
+    }
+   },
+   {
+    "key": "tests",
+    "format": "int",
+    "label": {
+     "en": "Unit tests",
+     "de": "Unit-Tests",
+     "es": "Pruebas unitarias",
+     "it": "Test unitari",
+     "fr": "Tests unitaires"
+    }
+   }
+  ]
+ },
+ "content": {
+  "meta": {
+   "title": "Pegel — Free Open-Source Equalizer for Android",
+   "description": "Free, open-source system equalizer for Android: ten bands, bass, loudness, virtualizer and a profile per headphone. No ads, no tracking, no account.",
+   "og_title": "Pegel — shape what you hear.",
+   "og_description": "A free, open-source equalizer for Android with ten bands, bass boost, loudness, virtualizer and profiles that follow your headphones.",
+   "twitter_description": "Free, open-source Android equalizer: ten bands, bass, loudness, virtualizer, a profile per output device. No ads, no tracking.",
+   "image_alt": "Fourteen green level-meter bars forming an equalizer curve with amber peak markers on a dark background, next to the Pegel icon and the words “Pegel — Shape what you hear.”"
+  },
+  "summary": "Pegel is a free, open-source (MIT) system equalizer for Android 9 and later. It offers a ten-band equalizer (31 Hz to 16 kHz, ±12 dB in 0.5 dB steps) with a live response curve, 13 presets and your own presets, plus bass boost, loudness, a virtualizer, optional reverb and left/right balance. The whole sound can be saved as a profile, and each output — speaker, wired headphones, USB audio, each Bluetooth device — can have its own profile that Pegel applies when that output becomes active. Pegel does not process audio itself: it configures Android's own effects (DynamicsProcessing, Virtualizer, PresetReverb) on the global mix and on the audio sessions that music players announce, so it works without root and within the limits Android sets — apps that neither announce their session nor play through the global mix are not reached. Profiles, presets and settings can be backed up to one JSON file, and single profiles shared as .pegel files. There are no ads, no tracking and no account; the only network access is the update check, which can be switched off, and the checksum-verified update the app installs itself. Distributed as a signed APK through GitHub Releases.",
+  "meta_fallback": "Newest release · Android 9+ · free, MIT licence",
+  "feature_list": [
+   "Ten-band equalizer, 31 Hz to 16 kHz, ±12 dB in 0.5 dB steps, with a live response curve",
+   "13 built-in presets and your own presets",
+   "Bass boost with adjustable cutoff frequency (10–150 Hz) and maximum gain",
+   "Loudness that pushes the gain into a limiter instead of clipping",
+   "Virtualizer, optional reverb (rooms, halls, plate) and left/right balance",
+   "Profiles: the whole sound under a name — load, save, rename, delete, discard changes",
+   "A profile per output device: speaker, wired headphones, USB audio, each Bluetooth device",
+   "Works on the global mix and on audio sessions announced by music players, switchable in Settings",
+   "A status line that always says what the effects are attached to",
+   "Backup and restore of all profiles, presets and settings as one JSON file; single profiles as .pegel files",
+   "Starts again after a reboot and after an app update",
+   "In-app updates: a daily check without any identifier, download with SHA-256 verification, installation through Android's installer; the check can be switched off",
+   "A help page explaining which apps an equalizer can reach and what to try",
+   "Material 3 Expressive interface, light and dark, optional Material You colours",
+   "No ads, no tracking, no account, no paid version",
+   "English and German, including per-app language on Android 13+"
+  ],
+  "limits": [
+   "Android 9 or later only; not on Google Play — distributed as an APK through GitHub Releases.",
+   "No root: Pegel reaches only audio that plays through the global mix or through a session a player announces. Apps with their own audio engine or copy protection may not be affected.",
+   "Whether effects on the global mix are allowed depends on the device.",
+   "Reverb works only on a player's own session, not on the global mix.",
+   "Over Bluetooth, some phones need “Disable Bluetooth A2DP hardware offload” in the developer options before effects are audible.",
+   "Two equalizers at once (including the one built into the phone) fight over the same audio session — use one.",
+   "The interface is available in English and German only.",
+   "It is not a parametric equalizer: the ten band frequencies are fixed."
+  ],
+  "hero.kicker": {
+   "en": "Android · Open source · Free",
+   "de": "Android · Open Source · Kostenlos",
+   "es": "Android · Código abierto · Gratis",
+   "it": "Android · Open source · Gratis",
+   "fr": "Android · Open source · Gratuit"
+  },
+  "hero.title": {
+   "en": "Shape what <br>you hear.",
+   "de": "Forme, was <br>du hörst.",
+   "es": "Dale forma a <br>lo que oyes.",
+   "it": "Dai forma a <br>ciò che senti.",
+   "fr": "Façonnez ce que <br>vous entendez."
+  },
+  "hero.lead": {
+   "en": "Pegel is a system equalizer for Android: ten bands, bass, loudness and virtualizer — and a profile for every pair of headphones that loads by itself. No ads, no tracking, no account.",
+   "de": "Pegel ist ein System-Equalizer für Android: zehn Bänder, Bass, Loudness und Virtualizer – und für jeden Kopfhörer ein Profil, das sich von selbst lädt. Keine Werbung, kein Tracking, kein Konto.",
+   "es": "Pegel es un ecualizador de sistema para Android: diez bandas, graves, loudness y virtualizador, y un perfil para cada auricular que se carga solo. Sin anuncios, sin rastreo, sin cuenta.",
+   "it": "Pegel è un equalizzatore di sistema per Android: dieci bande, bassi, loudness e virtualizzatore, e un profilo per ogni cuffia che si carica da solo. Niente pubblicità, niente tracciamento, niente account.",
+   "fr": "Pegel est un égaliseur système pour Android : dix bandes, basses, loudness et virtualiseur, et un profil pour chaque casque qui se charge tout seul. Sans publicité, sans pistage, sans compte."
+  },
+  "pl.h": {
+   "en": "A profile for every output",
+   "de": "Ein Profil für jeden Ausgang",
+   "es": "Un perfil para cada salida",
+   "it": "Un profilo per ogni uscita",
+   "fr": "Un profil pour chaque sortie"
+  },
+  "f.h": {
+   "en": "Everything an equalizer needs. Nothing else.",
+   "de": "Alles, was ein Equalizer braucht. Sonst nichts.",
+   "es": "Todo lo que necesita un ecualizador. Nada más.",
+   "it": "Tutto ciò che serve a un equalizzatore. Nient'altro.",
+   "fr": "Tout ce qu'il faut à un égaliseur. Rien d'autre."
+  },
+  "features": [
+   {
+    "t": {
+     "en": "Ten bands, half-decibel steps",
+     "de": "Zehn Bänder, halbe Dezibel",
+     "es": "Diez bandas, pasos de medio decibelio",
+     "it": "Dieci bande, passi di mezzo decibel",
+     "fr": "Dix bandes, pas d'un demi-décibel"
+    },
+    "p": {
+     "en": "From 31 Hz to 16 kHz, ±12 dB each, with a curve above the sliders that shows what you are doing. 13 presets to start from, and your own next to them.",
+     "de": "Von 31 Hz bis 16 kHz, je ±12 dB, darüber eine Kurve, die zeigt, was du gerade tust. 13 Presets als Ausgangspunkt, daneben deine eigenen.",
+     "es": "De 31 Hz a 16 kHz, ±12 dB cada una, con una curva sobre los controles que muestra lo que haces. 13 ajustes para empezar, y los tuyos al lado.",
+     "it": "Da 31 Hz a 16 kHz, ±12 dB ciascuna, con una curva sopra i cursori che mostra ciò che fai. 13 preset da cui partire, e accanto i tuoi.",
+     "fr": "De 31 Hz à 16 kHz, ±12 dB chacune, avec une courbe au-dessus des curseurs qui montre ce que vous faites. 13 préréglages pour commencer, et les vôtres à côté."
+    }
+   },
+   {
+    "t": {
+     "en": "Bass, loudness, virtualizer",
+     "de": "Bass, Loudness, Virtualizer",
+     "es": "Graves, loudness, virtualizador",
+     "it": "Bassi, loudness, virtualizzatore",
+     "fr": "Basses, loudness, virtualiseur"
+    },
+    "p": {
+     "en": "Each with one strength slider. Loudness pushes its gain into a limiter, so a boost gets denser instead of clipping. Reverb and balance are there when you want them.",
+     "de": "Jeder mit einem Stärkeregler. Loudness schiebt seine Verstärkung in einen Limiter – mehr Druck statt Verzerrung. Hall und Balance gibt es, wenn du sie willst.",
+     "es": "Cada uno con un control de intensidad. El loudness envía su ganancia a un limitador: el sonido gana densidad en vez de saturar. Reverberación y balance, si los quieres.",
+     "it": "Ognuno con un cursore di intensità. Il loudness manda il guadagno in un limiter: il suono si fa più denso invece di distorcere. Riverbero e bilanciamento, se li vuoi.",
+     "fr": "Chacun avec un curseur d'intensité. Le loudness envoie son gain dans un limiteur : le son gagne en densité au lieu de saturer. Réverbération et balance, si vous les voulez."
+    }
+   },
+   {
+    "t": {
+     "en": "Profiles that follow your headphones",
+     "de": "Profile, die deinem Kopfhörer folgen",
+     "es": "Perfiles que siguen a tus auriculares",
+     "it": "Profili che seguono le tue cuffie",
+     "fr": "Des profils qui suivent votre casque"
+    },
+    "p": {
+     "en": "Save the whole sound under a name and give each output its own: speaker, wired, USB, every Bluetooth device. Plug in or connect, and Pegel loads the right one.",
+     "de": "Speichere den ganzen Klang unter einem Namen und gib jedem Ausgang seinen eigenen: Lautsprecher, Kabel, USB, jedes Bluetooth-Gerät. Einstecken oder verbinden – Pegel lädt das passende Profil.",
+     "es": "Guarda todo el sonido con un nombre y da a cada salida el suyo: altavoz, cable, USB, cada dispositivo Bluetooth. Conecta, y Pegel carga el adecuado.",
+     "it": "Salva l'intero suono con un nome e dai a ogni uscita il suo: altoparlante, cavo, USB, ogni dispositivo Bluetooth. Collega, e Pegel carica quello giusto.",
+     "fr": "Enregistrez tout le son sous un nom et donnez à chaque sortie le sien : haut-parleur, filaire, USB, chaque appareil Bluetooth. Branchez, et Pegel charge le bon."
+    }
+   },
+   {
+    "t": {
+     "en": "Honest about what it reaches",
+     "de": "Ehrlich, was es erreicht",
+     "es": "Honesto sobre lo que alcanza",
+     "it": "Onesto su ciò che raggiunge",
+     "fr": "Honnête sur ce qu'il atteint"
+    },
+    "p": {
+     "en": "Without root, an equalizer reaches the global mix and the players that announce their audio. Pegel uses both, and one line at the top always says what it is attached to right now.",
+     "de": "Ohne Root erreicht ein Equalizer den globalen Mix und die Player, die ihr Audio ankündigen. Pegel nutzt beides, und eine Zeile ganz oben sagt immer, womit es gerade verbunden ist.",
+     "es": "Sin root, un ecualizador alcanza la mezcla global y los reproductores que anuncian su audio. Pegel usa ambos, y una línea arriba dice siempre a qué está conectado.",
+     "it": "Senza root, un equalizzatore raggiunge il mix globale e i lettori che annunciano il proprio audio. Pegel usa entrambi, e una riga in alto dice sempre a cosa è collegato.",
+     "fr": "Sans root, un égaliseur atteint le mixage global et les lecteurs qui annoncent leur audio. Pegel utilise les deux, et une ligne en haut dit toujours à quoi il est relié."
+    }
+   },
+   {
+    "t": {
+     "en": "Backup and sharing",
+     "de": "Sichern und teilen",
+     "es": "Copia y compartir",
+     "it": "Backup e condivisione",
+     "fr": "Sauvegarde et partage"
+    },
+    "p": {
+     "en": "All profiles, presets and settings in one JSON file — and back. A single profile travels as a <code>.pegel</code> file to anyone who has the app.",
+     "de": "Alle Profile, Presets und Einstellungen in einer JSON-Datei – und zurück. Ein einzelnes Profil geht als <code>.pegel</code>-Datei an jeden, der die App hat.",
+     "es": "Todos los perfiles, ajustes y opciones en un archivo JSON, y de vuelta. Un perfil suelto viaja como archivo <code>.pegel</code> a quien tenga la app.",
+     "it": "Tutti i profili, i preset e le impostazioni in un file JSON, e ritorno. Un singolo profilo viaggia come file <code>.pegel</code> verso chiunque abbia l'app.",
+     "fr": "Tous les profils, préréglages et réglages dans un fichier JSON, et retour. Un profil seul voyage en fichier <code>.pegel</code> vers quiconque a l'appli."
+    }
+   },
+   {
+    "t": {
+     "en": "Nothing but sound",
+     "de": "Nichts außer Klang",
+     "es": "Nada más que sonido",
+     "it": "Nient'altro che suono",
+     "fr": "Rien d'autre que le son"
+    },
+    "p": {
+     "en": "No ads, no analytics, no account, no paid version. The app goes online for one thing only — its own, checksum-verified updates — and even that can be switched off.",
+     "de": "Keine Werbung, keine Analyse, kein Konto, keine Bezahlversion. Die App geht für genau eine Sache ins Netz – ihre eigenen, per Prüfsumme geprüften Updates – und selbst das lässt sich ausschalten.",
+     "es": "Sin anuncios, sin analíticas, sin cuenta, sin versión de pago. La app se conecta para una sola cosa, sus propias actualizaciones verificadas, y hasta eso se puede desactivar.",
+     "it": "Niente pubblicità, niente analisi, niente account, niente versione a pagamento. L'app va online per una sola cosa, i propri aggiornamenti verificati, e anche questo si può disattivare.",
+     "fr": "Sans publicité, sans statistiques, sans compte, sans version payante. L'appli se connecte pour une seule chose, ses propres mises à jour vérifiées, et même cela se désactive."
+    }
+   }
+  ],
+  "s.h": {
+   "en": "Material 3 Expressive, in signal green",
+   "de": "Material 3 Expressive, in Signalgrün",
+   "es": "Material 3 Expressive, en verde señal",
+   "it": "Material 3 Expressive, in verde segnale",
+   "fr": "Material 3 Expressive, en vert signal"
+  },
+  "s.alt": {
+   "en": "Three screens: the Sound tab with the ten-band equalizer and its curve, the preset list, and the Profiles tab with a profile bound to the speaker",
+   "de": "Drei Bildschirme: der Klang-Tab mit dem Zehn-Band-Equalizer und seiner Kurve, die Preset-Liste und der Profile-Tab mit einem Profil für den Lautsprecher",
+   "es": "Tres pantallas: la pestaña Sonido con el ecualizador de diez bandas y su curva, la lista de ajustes y la pestaña Perfiles con un perfil asignado al altavoz",
+   "it": "Tre schermate: la scheda Suono con l'equalizzatore a dieci bande e la sua curva, l'elenco dei preset e la scheda Profili con un profilo assegnato all'altoparlante",
+   "fr": "Trois écrans : l'onglet Son avec l'égaliseur dix bandes et sa courbe, la liste des préréglages et l'onglet Profils avec un profil lié au haut-parleur"
+  },
+  "install": [
+   {
+    "t": {
+     "en": "Download the APK",
+     "de": "APK herunterladen",
+     "es": "Descarga el APK",
+     "it": "Scarica l'APK",
+     "fr": "Téléchargez l'APK"
+    },
+    "p": {
+     "en": "One file for every phone with Android 9 or later — there is nothing to pick.",
+     "de": "Eine Datei für jedes Handy mit Android 9 oder neuer – es gibt nichts auszuwählen.",
+     "es": "Un archivo para cualquier móvil con Android 9 o posterior: no hay nada que elegir.",
+     "it": "Un file per ogni telefono con Android 9 o successivo: non c'è nulla da scegliere.",
+     "fr": "Un fichier pour tout téléphone sous Android 9 ou plus récent : rien à choisir."
+    }
+   },
+   {
+    "t": {
+     "en": "Allow the install",
+     "de": "Installation erlauben",
+     "es": "Permite la instalación",
+     "it": "Consenti l'installazione",
+     "fr": "Autorisez l'installation"
+    },
+    "p": {
+     "en": "Open the file. Android asks once whether your browser may install apps — allow it.",
+     "de": "Öffne die Datei. Android fragt einmal, ob dein Browser Apps installieren darf – erlaube es.",
+     "es": "Abre el archivo. Android pregunta una vez si tu navegador puede instalar apps: permítelo.",
+     "it": "Apri il file. Android chiede una volta se il browser può installare app: consentilo.",
+     "fr": "Ouvrez le fichier. Android demande une fois si votre navigateur peut installer des applis : autorisez-le."
+    }
+   },
+   {
+    "t": {
+     "en": "Switch Pegel on",
+     "de": "Pegel einschalten",
+     "es": "Activa Pegel",
+     "it": "Attiva Pegel",
+     "fr": "Activez Pegel"
+    },
+    "p": {
+     "en": "The switch is at the top right. If a player does not react, look for “system equalizer” in its audio settings — the in-app help lists what to try.",
+     "de": "Der Schalter sitzt oben rechts. Reagiert ein Player nicht, suche in seinen Audio-Einstellungen nach „System-Equalizer“ – die Hilfe in der App nennt, was du probieren kannst.",
+     "es": "El interruptor está arriba a la derecha. Si un reproductor no reacciona, busca «ecualizador del sistema» en sus ajustes de audio; la ayuda de la app indica qué probar.",
+     "it": "L'interruttore è in alto a destra. Se un lettore non reagisce, cerca «equalizzatore di sistema» nelle sue impostazioni audio: la guida nell'app elenca cosa provare.",
+     "fr": "L'interrupteur est en haut à droite. Si un lecteur ne réagit pas, cherchez « égaliseur système » dans ses réglages audio : l'aide de l'appli indique quoi essayer."
+    }
+   }
+  ],
+  "v.p": {
+   "en": "Every release is signed with the same key. Compare with <code>apksigner verify --print-certs</code>.",
+   "de": "Jedes Release ist mit demselben Schlüssel signiert. Vergleiche mit <code>apksigner verify --print-certs</code>.",
+   "es": "Cada versión está firmada con la misma clave. Compáralo con <code>apksigner verify --print-certs</code>.",
+   "it": "Ogni versione è firmata con la stessa chiave. Confronta con <code>apksigner verify --print-certs</code>.",
+   "fr": "Chaque version est signée avec la même clé. Comparez avec <code>apksigner verify --print-certs</code>."
+  },
+  "i.note": {
+   "en": "Pegel is not on Google Play. Every release is built and signed by GitHub Actions from the public source code and published on GitHub Releases.",
+   "de": "Pegel ist nicht bei Google Play. Jedes Release wird von GitHub Actions aus dem öffentlichen Quellcode gebaut, signiert und auf GitHub Releases veröffentlicht.",
+   "es": "Pegel no está en Google Play. Cada versión la compila y firma GitHub Actions a partir del código fuente público y se publica en GitHub Releases.",
+   "it": "Pegel non è su Google Play. Ogni versione è compilata e firmata da GitHub Actions dal codice sorgente pubblico e pubblicata su GitHub Releases.",
+   "fr": "Pegel n'est pas sur Google Play. Chaque version est compilée et signée par GitHub Actions à partir du code source public, puis publiée sur GitHub Releases."
+  },
+  "faq": [
+   {
+    "q": {
+     "en": "Is Pegel free?",
+     "de": "Ist Pegel kostenlos?",
+     "es": "¿Pegel es gratis?",
+     "it": "Pegel è gratuito?",
+     "fr": "Pegel est-il gratuit ?"
+    },
+    "a": {
+     "en": "Yes. It is free and open source under the MIT licence — no ads, no account, no tracking, and no paid version with more features.",
+     "de": "Ja. Pegel ist kostenlos und Open Source unter der MIT-Lizenz – ohne Werbung, ohne Konto, ohne Tracking und ohne Bezahlversion mit mehr Funktionen.",
+     "es": "Sí. Es gratis y de código abierto con licencia MIT: sin anuncios, sin cuenta, sin rastreo y sin versión de pago con más funciones.",
+     "it": "Sì. È gratuito e open source con licenza MIT: niente pubblicità, niente account, niente tracciamento e nessuna versione a pagamento con più funzioni.",
+     "fr": "Oui. Il est gratuit et open source sous licence MIT : sans publicité, sans compte, sans pistage et sans version payante plus complète."
+    }
+   },
+   {
+    "q": {
+     "en": "Does it work with every app?",
+     "de": "Funktioniert es mit jeder App?",
+     "es": "¿Funciona con todas las apps?",
+     "it": "Funziona con tutte le app?",
+     "fr": "Fonctionne-t-il avec toutes les applis ?"
+    },
+    "a": {
+     "en": "No equalizer without root does. Pegel reaches what plays through the phone's global mix and every player that announces its audio session; some players need “system equalizer” switched on in their settings. Apps with their own audio engine or copy protection may stay unaffected.",
+     "de": "Das kann kein Equalizer ohne Root. Pegel erreicht, was über den globalen Mix des Handys läuft, und jeden Player, der seine Audio-Sitzung ankündigt; bei manchen Playern muss dafür „System-Equalizer“ eingeschaltet sein. Apps mit eigener Audio-Engine oder Kopierschutz bleiben unter Umständen unbeeinflusst.",
+     "es": "Ningún ecualizador sin root lo consigue. Pegel alcanza lo que suena por la mezcla global del móvil y cada reproductor que anuncia su sesión de audio; algunos necesitan activar «ecualizador del sistema» en sus ajustes. Las apps con motor de audio propio o protección anticopia pueden quedar sin efecto.",
+     "it": "Nessun equalizzatore senza root ci riesce. Pegel raggiunge ciò che passa dal mix globale del telefono e ogni lettore che annuncia la propria sessione audio; in alcuni va attivato «equalizzatore di sistema» nelle impostazioni. Le app con un proprio motore audio o protezione anticopia possono restare escluse.",
+     "fr": "Aucun égaliseur sans root n'y parvient. Pegel atteint ce qui passe par le mixage global du téléphone et chaque lecteur qui annonce sa session audio ; certains demandent d'activer « égaliseur système » dans leurs réglages. Les applis dotées de leur propre moteur audio ou d'une protection anticopie peuvent rester hors de portée."
+    }
+   },
+   {
+    "q": {
+     "en": "Does anything leave my phone?",
+     "de": "Verlässt irgendetwas mein Handy?",
+     "es": "¿Sale algo de mi móvil?",
+     "it": "Qualcosa lascia il mio telefono?",
+     "fr": "Quelque chose quitte-t-il mon téléphone ?"
+    },
+    "a": {
+     "en": "No. Pegel does not record or analyse audio — it only configures effects that Android runs. The only network access is the update check: it reads the newest version number from this page, without any identifier. Switch it off in Settings and the app makes no request at all.",
+     "de": "Nein. Pegel nimmt kein Audio auf und wertet keines aus – es stellt nur Effekte ein, die Android ausführt. Der einzige Netzzugriff ist die Update-Prüfung: Sie liest die neueste Versionsnummer von dieser Seite, ohne jede Kennung. Schaltest du sie in den Einstellungen aus, stellt die App gar keine Anfrage mehr.",
+     "es": "No. Pegel no graba ni analiza audio: solo configura efectos que ejecuta Android. El único acceso a la red es la comprobación de actualizaciones: lee el número de la última versión de esta página, sin ningún identificador. Desactívala en Ajustes y la app no hace ninguna petición.",
+     "it": "No. Pegel non registra né analizza l'audio: configura soltanto effetti eseguiti da Android. L'unico accesso alla rete è il controllo degli aggiornamenti: legge il numero dell'ultima versione da questa pagina, senza alcun identificativo. Disattivalo nelle impostazioni e l'app non fa più alcuna richiesta.",
+     "fr": "Non. Pegel n'enregistre ni n'analyse aucun son : il configure seulement des effets exécutés par Android. Le seul accès au réseau est la vérification des mises à jour : elle lit le numéro de la dernière version sur cette page, sans aucun identifiant. Désactivez-la dans les réglages et l'appli n'envoie plus aucune requête."
+    }
+   },
+   {
+    "q": {
+     "en": "Which phones does it run on?",
+     "de": "Auf welchen Handys läuft es?",
+     "es": "¿En qué móviles funciona?",
+     "it": "Su quali telefoni funziona?",
+     "fr": "Sur quels téléphones fonctionne-t-il ?"
+    },
+    "a": {
+     "en": "Android 9 or later — the audio engine Pegel builds on does not exist before that. On phones with aggressive battery savers, exempt the app from battery optimization; Settings offers it.",
+     "de": "Android 9 oder neuer – die Audio-Engine, auf der Pegel aufbaut, gibt es vorher nicht. Auf Handys mit strengen Akkusparern nimm die App von der Akku-Optimierung aus; die Einstellungen bieten das an.",
+     "es": "Android 9 o posterior: el motor de audio en el que se basa Pegel no existe antes. En móviles con ahorro de batería agresivo, excluye la app de la optimización de batería; Ajustes lo ofrece.",
+     "it": "Android 9 o successivo: il motore audio su cui si basa Pegel prima non esiste. Sui telefoni con risparmio energetico aggressivo, escludi l'app dall'ottimizzazione della batteria; le impostazioni lo propongono.",
+     "fr": "Android 9 ou plus récent : le moteur audio sur lequel repose Pegel n'existe pas avant. Sur les téléphones à l'économie d'énergie agressive, exemptez l'appli de l'optimisation de la batterie ; les réglages le proposent."
+    }
+   },
+   {
+    "q": {
+     "en": "How do I update?",
+     "de": "Wie aktualisiere ich?",
+     "es": "¿Cómo actualizo?",
+     "it": "Come aggiorno?",
+     "fr": "Comment mettre à jour ?"
+    },
+    "a": {
+     "en": "Inside the app. When a new version is out, a card appears on the first screen: <em>Update</em> downloads the file, checks its SHA-256 and hands it to Android to install. Your profiles and settings stay. You can also download the APK here and install it over the app.",
+     "de": "In der App. Gibt es eine neue Version, erscheint auf dem ersten Bildschirm eine Karte: <em>Aktualisieren</em> lädt die Datei, prüft ihre SHA-256-Prüfsumme und übergibt sie Android zur Installation. Profile und Einstellungen bleiben. Du kannst die APK auch hier laden und über die App installieren.",
+     "es": "Desde la app. Cuando sale una versión nueva aparece una tarjeta en la primera pantalla: <em>Update</em> descarga el archivo, comprueba su SHA-256 y lo entrega a Android para instalarlo. Tus perfiles y ajustes se conservan. También puedes descargar el APK aquí e instalarlo encima.",
+     "it": "Dall'app. Quando esce una nuova versione compare una scheda nella prima schermata: <em>Update</em> scarica il file, ne verifica lo SHA-256 e lo passa ad Android per l'installazione. Profili e impostazioni restano. Puoi anche scaricare l'APK qui e installarlo sopra l'app.",
+     "fr": "Depuis l'appli. Quand une nouvelle version sort, une carte apparaît sur le premier écran : <em>Update</em> télécharge le fichier, vérifie son SHA-256 et le confie à Android pour l'installation. Vos profils et réglages restent. Vous pouvez aussi télécharger l'APK ici et l'installer par-dessus."
+    }
+   },
+   {
+    "q": {
+     "en": "Is the file genuine?",
+     "de": "Ist die Datei echt?",
+     "es": "¿El archivo es auténtico?",
+     "it": "Il file è autentico?",
+     "fr": "Le fichier est-il authentique ?"
+    },
+    "a": {
+     "en": "Compare the SHA-256 checksum and the signing certificate shown on this page. Android also refuses to install an update signed with a different key over the app.",
+     "de": "Vergleiche die SHA-256-Prüfsumme und das Signaturzertifikat auf dieser Seite. Android weigert sich außerdem, ein mit einem anderen Schlüssel signiertes Update über die App zu installieren.",
+     "es": "Compara la suma SHA-256 y el certificado de firma que aparecen en esta página. Android además se niega a instalar sobre la app una actualización firmada con otra clave.",
+     "it": "Confronta il checksum SHA-256 e il certificato di firma mostrati in questa pagina. Android inoltre rifiuta di installare sopra l'app un aggiornamento firmato con un'altra chiave.",
+     "fr": "Comparez la somme SHA-256 et le certificat de signature affichés sur cette page. Android refuse en outre d'installer par-dessus l'appli une mise à jour signée avec une autre clé."
+    }
+   }
+  ],
+  "agent_queries": [
+   "Download the latest Pegel APK",
+   "Which version of Pegel is current?",
+   "How do I verify the Pegel APK signature?",
+   "Free open-source system equalizer for Android without ads",
+   "Android equalizer with a separate profile per Bluetooth headphone"
+  ],
+  "tags": [
+   "android",
+   "equalizer",
+   "audio",
+   "bass-boost",
+   "open-source",
+   "apk"
+  ],
+  "skill_description": "Download, verify and install the newest Pegel APK — the free, open-source system equalizer for Android with ten bands, bass, loudness, virtualizer and a profile per output device. Use when someone asks for the app, its latest version, a download link, or how to check the APK is genuine."
+ }
+}

@@ -195,6 +195,7 @@ fun AboutSection(onOpenFailed: () -> Unit) {
 
     Spacer(Modifier.height(12.dp))
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        LinkChip(AboutLinks.PRODUCT_LABEL, Icons.Outlined.Language) { open(AboutLinks.PRODUCT_URL) }
         LinkChip(AboutLinks.WEBSITE_LABEL, Icons.Outlined.Language) { open(AboutLinks.WEBSITE_URL) }
         LinkChip(stringResource(R.string.about_link_source), Icons.Outlined.Code) { open(AboutLinks.REPO_URL) }
         LinkChip(stringResource(R.string.about_link_changelog), Icons.Outlined.History) { open(AboutLinks.CHANGELOG_URL) }

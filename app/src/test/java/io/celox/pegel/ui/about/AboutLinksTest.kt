@@ -13,6 +13,8 @@ class AboutLinksTest {
         assertEquals("Martin Pfeffer", AboutLinks.AUTHOR)
         assertEquals("https://celox.io", AboutLinks.WEBSITE_URL)
         assertEquals("https://pegel.celox.io", AboutLinks.PRODUCT_URL)
+        assertEquals("pegel.celox.io", AboutLinks.PRODUCT_LABEL)
+        assertEquals("https://pegel.celox.io", AboutLinks.PRODUCT_URL)
         assertEquals("https://github.com/pepperonas/pegel", AboutLinks.REPO_URL)
         assertEquals("MIT License", AboutLinks.LICENSE_NAME)
         assertEquals("https://github.com/pepperonas/pegel/blob/main/LICENSE", AboutLinks.LICENSE_URL)

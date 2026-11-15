@@ -1,0 +1,32 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Pegel",
+    "identifier": "did:web:pegel.celox.io",
+    "documentationUrl": "https://pegel.celox.io/llms.txt"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:pegel.celox.io:skills:get-pegel",
+      "displayName": "Get Pegel",
+      "type": "text/markdown; profile=\"urn:air:agent-skills\"",
+      "url": "https://pegel.celox.io/skills/get-pegel/SKILL.md",
+      "description": "Pegel is a free, open-source (MIT) system equalizer for Android 9 and later. It offers a ten-band equalizer (31 Hz to 16 kHz, ±12 dB in 0.5 dB steps) with a live response curve, 13 presets and your own presets, plus bass boost, loudness, a virtualizer, optional reverb and left/right balance. The whole sound can be saved as a profile, and each output — speaker, wired headphones, USB audio, each Bluetooth device — can have its own profile that Pegel applies when that output becomes active. Pegel does not process audio itself: it configures Android's own effects (DynamicsProcessing, Virtualizer, PresetReverb) on the global mix and on the audio sessions that music players announce, so it works without root and within the limits Android sets — apps that neither announce their session nor play through the global mix are not reached. Profiles, presets and settings can be backed up to one JSON file, and single profiles shared as .pegel files. There are no ads, no tracking and no account; the only network access is the update check, which can be switched off, and the checksum-verified update the app installs itself. Distributed as a signed APK through GitHub Releases.",
+      "tags": [
+        "android",
+        "equalizer",
+        "audio",
+        "bass-boost",
+        "open-source",
+        "apk"
+      ],
+      "representativeQueries": [
+        "Download the latest Pegel APK",
+        "Which version of Pegel is current?",
+        "How do I verify the Pegel APK signature?",
+        "Free open-source system equalizer for Android without ads",
+        "Android equalizer with a separate profile per Bluetooth headphone"
+      ]
+    }
+  ]
+}

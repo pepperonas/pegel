@@ -1,0 +1,8 @@
+[Unit]
+Description=Publish the newest Pegel release on pegel.celox.io
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/sbin/pegel-latest.py
