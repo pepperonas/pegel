@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 /**
- * The opt-in switch and what the last check found. SharedPreferences rather than DataStore because
+ * The switch (on unless switched off) and what the last check found. SharedPreferences rather than DataStore because
  * the worker reads it synchronously; [changes] lets the UI follow it live.
  */
 object UpdateCheckStore {
@@ -15,11 +15,12 @@ object UpdateCheckStore {
     private const val KEY_ENABLED = "enabled"
     private const val KEY_LATEST = "latest_seen"
     private const val KEY_NOTIFIED = "notified_version"
+    private const val KEY_CHECKED_AT = "checked_at"
 
     private fun prefs(c: Context) = c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    /** Off by default — also for installs updating from a version without the switch. */
-    fun isEnabled(c: Context): Boolean = prefs(c).getBoolean(KEY_ENABLED, false)
+    /** On unless the user switched it off. */
+    fun isEnabled(c: Context): Boolean = prefs(c).getBoolean(KEY_ENABLED, true)
 
     fun setEnabled(c: Context, enabled: Boolean) {
         prefs(c).edit().putBoolean(KEY_ENABLED, enabled).apply()
@@ -31,6 +32,13 @@ object UpdateCheckStore {
         prefs(c).edit().putString(KEY_LATEST, version).apply()
     }
 
+    /** When a check last got an answer (epoch ms), 0 if never. */
+    fun lastCheckAt(c: Context): Long = prefs(c).getLong(KEY_CHECKED_AT, 0L)
+
+    fun recordCheck(c: Context, atMs: Long) {
+        prefs(c).edit().putLong(KEY_CHECKED_AT, atMs).apply()
+    }
+
     fun notifiedVersion(c: Context): String? = prefs(c).getString(KEY_NOTIFIED, null)
 
     fun markNotified(c: Context, version: String) {
@@ -39,7 +47,7 @@ object UpdateCheckStore {
 
     /** Switching off forgets the finding, so a stale banner cannot outlive the switch. */
     fun clearFindings(c: Context) {
-        prefs(c).edit().remove(KEY_LATEST).remove(KEY_NOTIFIED).apply()
+        prefs(c).edit().remove(KEY_LATEST).remove(KEY_NOTIFIED).remove(KEY_CHECKED_AT).apply()
     }
 
     /**

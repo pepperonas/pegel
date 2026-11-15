@@ -8,7 +8,14 @@ import io.celox.pegel.audio.EffectEngine
 import io.celox.pegel.data.PegelDatabase
 import io.celox.pegel.data.SettingsStore
 import io.celox.pegel.data.SoundRepository
+import io.celox.pegel.update.AndroidInstallGateway
+import io.celox.pegel.update.ReleaseSource
+import io.celox.pegel.update.UpdateInstaller
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 
@@ -24,4 +31,15 @@ class AppContainer(context: Context) {
         runBlocking { SoundRepository.create(database, SettingsStore(app.settingsDataStore)) }
 
     val engine = EffectEngine(AndroidEffectChainFactory { repository.settings.value.frameDurationMs.toFloat() })
+
+    /** The in-app update. Created on first use: most starts never touch it. */
+    val updateInstaller: UpdateInstaller by lazy {
+        UpdateInstaller(
+            source = ReleaseSource(),
+            gateway = AndroidInstallGateway(app),
+            dir = File(app.cacheDir, "update"),
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+            io = Dispatchers.IO,
+        )
+    }
 }

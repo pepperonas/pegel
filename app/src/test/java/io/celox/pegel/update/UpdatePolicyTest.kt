@@ -4,16 +4,18 @@ import io.celox.pegel.update.UpdatePolicy.Outcome
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UpdatePolicyTest {
 
     @Test
-    fun `nothing happens without the opt-in`() {
+    fun `nothing happens once it is switched off`() {
         assertEquals(Outcome.DISABLED, UpdatePolicy.decide(false, "v9.9.9", "1.9.1", null))
         assertNull(UpdatePolicy.bannerVersion(false, "v9.9.9", "1.9.1"))
-        // The privacy guarantee: no work is enqueued at app start unless switched on.
+        // The privacy guarantee: switched off, no work is enqueued and nothing is asked at app start.
         assertFalse(UpdatePolicy.scheduleOnStart(false))
+        assertFalse(UpdatePolicy.checkOnStart(false, lastCheckMs = 0, nowMs = DAY))
     }
 
     @Test
@@ -40,5 +42,19 @@ class UpdatePolicyTest {
         assertEquals("1.10.0", UpdatePolicy.bannerVersion(true, "v1.10.0", "1.9.1"))
         assertNull(UpdatePolicy.bannerVersion(true, "v1.9.1", "1.9.1"))
         assertNull(UpdatePolicy.bannerVersion(true, null, "1.9.1"))
+    }
+
+    @Test
+    fun `app start asks at most every twelve hours`() {
+        assertTrue("never checked", UpdatePolicy.checkOnStart(true, lastCheckMs = 0, nowMs = DAY))
+        assertFalse("an hour ago", UpdatePolicy.checkOnStart(true, lastCheckMs = DAY, nowMs = DAY + HOUR))
+        assertTrue("twelve hours ago", UpdatePolicy.checkOnStart(true, lastCheckMs = DAY, nowMs = DAY + 12 * HOUR))
+        // A clock set back must not silence the check for good.
+        assertTrue(UpdatePolicy.checkOnStart(true, lastCheckMs = DAY, nowMs = DAY - HOUR))
+    }
+
+    private companion object {
+        const val HOUR = 60L * 60 * 1000
+        const val DAY = 24 * HOUR
     }
 }

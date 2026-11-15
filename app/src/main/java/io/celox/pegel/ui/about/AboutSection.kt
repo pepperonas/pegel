@@ -63,6 +63,7 @@ import io.celox.pegel.R
 import io.celox.pegel.ui.theme.ThemeMode
 import io.celox.pegel.ui.theme.springPressed
 import io.celox.pegel.update.AppVersion
+import io.celox.pegel.ui.update.UpdateBanner
 import io.celox.pegel.update.UpdateCheckStore
 import io.celox.pegel.update.UpdateChecker
 import io.celox.pegel.update.UpdateScheduler
@@ -117,8 +118,8 @@ fun AppearanceSection(
 }
 
 /**
- * The opt-in update check. Off by default; while off, the app makes no network request at all —
- * the switch is the only thing that ever uses the INTERNET permission.
+ * The update check: on unless switched off. Switched off, the app makes no network request at all —
+ * the check and the update it installs are the only things that ever use the INTERNET permission.
  */
 @Composable
 fun UpdateSection(onOpenFailed: () -> Unit) {
@@ -127,7 +128,7 @@ fun UpdateSection(onOpenFailed: () -> Unit) {
     val on = remember(tick) { UpdateCheckStore.isEnabled(context) }
     val latest = remember(tick) { UpdateCheckStore.latestSeen(context) }
     val newer = remember(tick) { UpdateChecker.bannerVersion(context) }
-    // Asked only when the check is switched on; the in-app banner works without it.
+    // Asked only when the check is switched on by hand; the card in the app works without it.
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     SwitchRow(
@@ -142,25 +143,18 @@ fun UpdateSection(onOpenFailed: () -> Unit) {
             }
         }
     )
+    // The offer itself, with the install button — also shows a running or failed installation.
+    UpdateBanner(onOpenFailed = onOpenFailed)
     if (on) {
-        Text(
-            when {
-                newer != null -> stringResource(R.string.update_status_available, newer)
-                latest != null -> stringResource(R.string.update_status_current, AppVersion.display(latest))
-                else -> stringResource(R.string.update_status_none)
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = if (newer != null) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { UpdateScheduler.checkNow(context) }) { Text(stringResource(R.string.update_check_now)) }
-            if (newer != null) {
-                TextButton(onClick = { if (!UpdateChecker.openDownload(context)) onOpenFailed() }) {
-                    Text(stringResource(R.string.update_download))
-                }
-            }
+        if (newer == null) {
+            Text(
+                if (latest != null) stringResource(R.string.update_status_current, AppVersion.display(latest))
+                else stringResource(R.string.update_status_none),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
+        TextButton(onClick = { UpdateScheduler.checkNow(context) }) { Text(stringResource(R.string.update_check_now)) }
     }
 }
 

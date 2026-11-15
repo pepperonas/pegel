@@ -9,7 +9,7 @@ Issues and pull requests are welcome.
   test that fails without it. Every user-visible text goes into `res/values/strings.xml` **and**
   `res/values-de/strings.xml` (`LocalizationTest` checks both).
 - **Scope:** Pegel has no ads, no tracking and no account, and that is not negotiable. The only
-  network access is the opt-in update check.
+  network access is the update check (which can be switched off) and the update it downloads.
 - Pegel is written from Android's public `android.media.audiofx` API. Please do not contribute code,
   tables or texts taken from other equalizer apps.
 

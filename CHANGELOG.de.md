@@ -4,7 +4,7 @@ Alle nennenswerten Änderungen an Pegel. Format nach
 [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach
 [Semantic Versioning](https://semver.org/lang/de/).
 
-## [1.0.0] - 2026-11-14
+## [1.0.0] - 2026-11-15
 
 Erste Version.
 
@@ -29,7 +29,10 @@ Erste Version.
 - Eine **Hilfeseite**, die erklärt, warum ein Equalizer mit manchen Apps funktioniert und mit
   anderen nicht, und was man probieren kann.
 - Material 3 Expressive, hell und dunkel, optional Material-You-Farben, Englisch und Deutsch.
-- Eine **Update-Prüfung** gegen GitHub Releases zum Einschalten — standardmäßig aus und das
-  Einzige in der App, das ins Netz geht.
+- **Updates in der App:** Einmal am Tag und beim Öffnen fragt Pegel seine Produktseite nach der
+  neuesten Version (ohne Kennung) und zeigt eine Karte auf dem ersten Bildschirm. *Aktualisieren*
+  lädt die Datei, prüft ihre SHA-256-Prüfsumme und übergibt sie Androids Installer; ein
+  abgebrochener Download macht weiter. Die Prüfung lässt sich in den Einstellungen ausschalten —
+  dann geht die App nie ins Netz.
 
 Keine Werbung, kein Tracking, kein Konto, keine Bezahlschranke.

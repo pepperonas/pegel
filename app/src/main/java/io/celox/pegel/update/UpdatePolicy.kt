@@ -27,7 +27,17 @@ object UpdatePolicy {
 
     /**
      * Whether app start may (re)create the periodic check. This is the privacy guarantee in one
-     * line: without the opt-in, no work is ever enqueued, so nothing can reach the network.
+     * line: switched off, no work is ever enqueued, so nothing can reach the network.
      */
     fun scheduleOnStart(enabled: Boolean): Boolean = enabled
+
+    /**
+     * Whether opening the app asks right away. The daily worker can be days late on a phone that
+     * dozes; the moment someone opens the app is when a waiting update should already be known.
+     * A timestamp from the future (clock set back) counts as "never".
+     */
+    fun checkOnStart(enabled: Boolean, lastCheckMs: Long, nowMs: Long): Boolean =
+        enabled && (lastCheckMs > nowMs || nowMs - lastCheckMs >= START_CHECK_INTERVAL_MS)
+
+    const val START_CHECK_INTERVAL_MS = 12L * 60 * 60 * 1000
 }

@@ -4,7 +4,7 @@ All notable changes to Pegel. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [1.0.0] - 2026-11-14
+## [1.0.0] - 2026-11-15
 
 First release.
 
@@ -28,7 +28,9 @@ First release.
 - A **help page** that explains why an equalizer works with some apps and not with others, and what
   to try.
 - Material 3 Expressive design, light and dark, optional Material You colours, English and German.
-- An opt-in **update check** against GitHub Releases — off by default, and the only thing in the
-  app that goes online.
+- **Updates inside the app:** once a day and when it is opened, Pegel asks its product page for the
+  newest version (no identifier) and shows a card on the first screen. *Update* downloads the file,
+  verifies its SHA-256 and hands it to Android's installer; a broken download resumes. The check can
+  be switched off in Settings — then the app never goes online.
 
 No ads, no tracking, no account, no paywall.

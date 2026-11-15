@@ -8,8 +8,10 @@ class PegelApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // Re-creates the daily update check only if it was switched on — off means no work at all.
-        UpdateScheduler.ensureScheduled(this)
+        // Keeps the daily update check alive and asks now if the last answer is old — unless the
+        // check was switched off: then no work is enqueued at all.
+        // Wrapped: an update check must never keep the app from starting.
+        runCatching { UpdateScheduler.ensureScheduled(this) }
     }
 }
 

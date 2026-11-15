@@ -43,9 +43,18 @@ object UpdateScheduler {
         )
     }
 
-    /** App start: re-creates the daily check if (and only if) it was switched on. */
-    fun ensureScheduled(context: Context) {
-        if (UpdatePolicy.scheduleOnStart(UpdateCheckStore.isEnabled(context))) enqueuePeriodic(context)
+    /** App start: keeps the daily check alive unless it was switched off, and asks now if the last answer is old. */
+    fun ensureScheduled(context: Context, nowMs: Long = System.currentTimeMillis()) {
+        val enabled = UpdateCheckStore.isEnabled(context)
+        if (UpdatePolicy.scheduleOnStart(enabled)) enqueuePeriodic(context)
+        if (UpdatePolicy.checkOnStart(enabled, UpdateCheckStore.lastCheckAt(context), nowMs)) {
+            // KEEP: a check that is already waiting for a connection is not replaced by another.
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                IMMEDIATE_WORK,
+                ExistingWorkPolicy.KEEP,
+                OneTimeWorkRequestBuilder<UpdateCheckWorker>().setConstraints(network).build(),
+            )
+        }
     }
 
     private fun enqueuePeriodic(context: Context) {

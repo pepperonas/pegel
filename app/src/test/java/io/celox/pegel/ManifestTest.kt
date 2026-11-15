@@ -28,8 +28,10 @@ class ManifestTest {
                 "android.permission.RECEIVE_BOOT_COMPLETED",
                 "android.permission.POST_NOTIFICATIONS",
                 "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-                // Only for the opt-in update check (off by default).
+                // Only for the update check (can be switched off) and the update it downloads.
                 "android.permission.INTERNET",
+                // Hands the verified update to Android's installer.
+                "android.permission.REQUEST_INSTALL_PACKAGES",
                 // WorkManager (the update check's scheduler) brings these two; declared in our own
                 // manifest so this list — and the README — show what the APK really requests.
                 "android.permission.ACCESS_NETWORK_STATE",
@@ -94,5 +96,11 @@ class ManifestTest {
         // only the dedicated cache folder — never the whole cache, files or database directory
         assertEquals(1, Regex("<(cache|files|external|root)[a-z-]*-path").findAll(paths).count())
         assertTrue(paths.contains("""<cache-path name="shared" path="shared/" />"""))
+    }
+
+    @Test
+    fun `the installer's answer stays inside the app`() {
+        val receiver = Regex("""<receiver\s+android:name="\.update\.InstallResultReceiver"[\s\S]*?/>""").find(manifest)!!.value
+        assertTrue(receiver.contains("android:exported=\"false\""))
     }
 }

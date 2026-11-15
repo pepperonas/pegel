@@ -9,8 +9,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <!-- Only for the opt-in update check against GitHub Releases (off by default). -->
+    <!-- Only for the update check and the update it downloads (pegel.celox.io, GitHub as fallback).
+         The check can be switched off in Settings; then nothing goes online. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Lets Pegel hand its own, checksum-verified update to Android's installer. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- WorkManager, which schedules that check, merges these two in anyway. Declared here so the
          list in this file (and in the README) is what the APK really requests. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -78,6 +81,11 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- Android's installer reports here how the in-app update went. -->
+        <receiver
+            android:name=".update.InstallResultReceiver"
+            android:exported="false" />
 
         <!-- Hands a shared profile file to the app the user picks; nothing is exported by default. -->
         <provider

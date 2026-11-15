@@ -64,6 +64,7 @@ import io.celox.pegel.audio.Preset
 import io.celox.pegel.audio.Target
 import io.celox.pegel.container
 import io.celox.pegel.service.ServiceStarter
+import io.celox.pegel.ui.update.UpdateBanner
 import io.celox.pegel.ui.common.NameDialog
 import io.celox.pegel.ui.common.appLabel
 
@@ -126,6 +127,7 @@ fun SoundScreen(onOpenProfiles: () -> Unit) {
         ) {
             if (ui.enabled) StatusRow(ui, onOpenProfiles, onDetach = vm::detachPlayers) else OffHint()
             ui.notice?.let { NoticeBanner(it, onAllowNotifications = ::requestNotifications) }
+            UpdateBanner()
 
             val s = ui.state
             EqCard(
