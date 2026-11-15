@@ -10,6 +10,9 @@ device. It does not process audio itself — it configures Android's own effects
 (`android.media.audiofx`) on audio sessions. No ads, no tracking, no account; `INTERNET` exists for
 one thing only, the opt-in update check (off by default).
 
+Repository: `github.com/pepperonas/pegel` (public, MIT). Distribution is GitHub Releases only — not
+Google Play.
+
 Single Gradle module (`:app`), Kotlin + Jetpack Compose (Material 3 Expressive), minSdk 28 /
 target+compile 35, JDK 17. minSdk is 28 rather than the house default 26 because
 `DynamicsProcessing` — the engine everything runs on — arrived in Android 9.
@@ -48,6 +51,37 @@ certificate with the repository variable `SIGNING_CERT_SHA256`, and publishes `p
 `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`. Locally `assembleRelease` signs via the gitignored
 `keystore.properties` + `release.jks` — never commit `*.jks`, `keystore.properties` or
 `local.properties`.
+
+The four secrets and the variable are set in the GitHub repo (2026-11-15). The key itself is backed
+up in the private keystore repository (`pegel-keystore/`, with a `secrets.txt` describing it) — it
+is the only signing key; if it is lost, no installed copy can ever be updated.
+
+Third-party actions are pinned to commit SHAs and Dependabot proposes updates. Do not merge a major
+bump of `setup-gradle` or `action-gh-release` blind: the release job only runs on a tag, so a broken
+bump shows up at the worst moment. `tests.yml` runs on every push and pull request.
+
+## Status (2026-11-15)
+
+- Built and accepted on an emulator with Android 9: service, global mix, player sessions, reboot,
+  app update, backup round trip, both languages, both themes.
+- **No release tag yet.** `v1.0.0` waits for a listening test on a real phone. Before tagging, set
+  the date of the `## [1.0.0]` section in both changelogs to the day of the tag.
+- Installed on a real phone (Android 17) as the signed release build; nothing has been verified
+  there yet. Open questions only real hardware answers:
+  - Do the 31 Hz and 62 Hz bands act separately at the default 10 ms block? If not, raise the
+    default block size (`Settings.frameDurationMs`) — it trades latency for bass resolution.
+  - Does loudness stay clean now that its gain sits in front of the limiter?
+  - The Android 12+ paths: refused foreground-service start, sticky restart, notification permission.
+  - Auto-apply with Bluetooth devices (only the speaker was exercised on the emulator).
+- Known and deliberately left: a restore interrupted by a configuration change in the few
+  milliseconds between the database commit and the settings write can leave new profiles with old
+  settings; the limiter is active even on "Flat" (not bit-transparent); any app can send a session
+  announcement and pull Pegel off the global mix ("Detach" brings it back).
+- The release APK is ~50 MB because `isMinifyEnabled = false` ships all of
+  `material-icons-extended`. Turning R8 on would shrink it to a few MB but needs a full pass over
+  the app first (Room, WorkManager, reflection in the update check).
+- Follow-ups, not part of 1.0.0: product page `pegel.celox.io`, a share link for profiles, a legacy
+  effect path for Android 8.
 
 ## Architecture (data flow)
 
