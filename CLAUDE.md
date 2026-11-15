@@ -62,7 +62,13 @@ bump shows up at the worst moment. `tests.yml` runs on every push and pull reque
 
 ## Status (2026-11-15)
 
-- **v1.0.0 is released** (2026-11-15) and is what `pegel.celox.io/download` serves.
+- **v1.0.1 is released** (2026-11-15) and is what `pegel.celox.io/download` serves; v1.0.0 was the
+  first release the same day.
+- **AUTO prefers the global mix since 1.0.1.** On the S24 Ultra, Spotify announces its session and
+  the old AUTO moved there; only the global mix was audible (the move itself was inferred from the
+  phone's broadcast history, not watched). AUTO now takes the global mix wherever the device grants
+  it and follows players only where it is refused or lost. The app cannot measure audibility
+  (that would need the microphone permission) — "granted" is the only signal there is.
 - Built and accepted on an emulator with Android 9: service, global mix, player sessions, reboot,
   app update, backup round trip, both languages, both themes — and the in-app update end to end
   (a signed 0.9.0 test build found 1.0.0 on the page, downloaded, verified, asked for the install
@@ -82,9 +88,8 @@ bump shows up at the worst moment. `tests.yml` runs on every push and pull reque
   `material-icons-extended`. Turning R8 on would shrink it to a few MB but needs a full pass over
   the app first (Room, WorkManager, reflection in the update check).
 - The settings screenshots in `docs/screenshots/` still show the old icon in the About card.
-- Not in a release yet: the `pegel.celox.io` chip in the About section and the README links to the
-  page. The changelog has no "Unreleased" section (`ChangelogTest` wants every section dated) — put
-  them into the next version's section.
+- The changelog has no "Unreleased" section (`ChangelogTest` wants every section dated) — put
+  pending changes into the next version's section.
 - Follow-ups: a share link for profiles, a legacy effect path for Android 8.
 
 ## Icon and artwork
@@ -151,7 +156,8 @@ UI (Compose) ──update()──▶ SoundRepository ──state/settings──�
 - **Foreground-service starts can be refused** (Android 12+, app in the background).
   `ServiceStarter.sync` turns that into a "tap to activate" notification; `MainActivity.onStart`
   starts the service again. Do not call `startForegroundService` anywhere else.
-- **A lost global mix is not grabbed back** until the user does something — two equalizers taking
+- **A lost global mix is not grabbed back** until the user does something (switch, mode, detach —
+  not a player announcing itself: players do that on every track) — two equalizers taking
   session 0 from each other would never settle (`EffectEngine.globalLost`, pinned by a test).
   `setEnabled(true)` while already on is *not* such an event: the service re-asserts it on every
   state change.
