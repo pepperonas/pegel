@@ -60,10 +60,10 @@ Third-party actions are pinned to commit SHAs and Dependabot proposes updates. D
 bump of `setup-gradle` or `action-gh-release` blind: the release job only runs on a tag, so a broken
 bump shows up at the worst moment. `tests.yml` runs on every push and pull request.
 
-## Status (2026-11-15)
+## Status (2026-11-15, after 1.1.0)
 
-- **v1.0.1 is released** (2026-11-15) and is what `pegel.celox.io/download` serves; v1.0.0 was the
-  first release the same day.
+- **v1.1.0 is released** (2026-11-15) and is what `pegel.celox.io/download` serves (1.0.0 and 1.0.1
+  the same day): suggested sound per device, status in whole sentences, 22 presets, headroom.
 - **AUTO prefers the global mix since 1.0.1.** On the S24 Ultra, Spotify announces its session and
   the old AUTO moved there; only the global mix was audible (the move itself was inferred from the
   phone's broadcast history, not watched). AUTO now takes the global mix wherever the device grants
