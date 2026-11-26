@@ -211,7 +211,10 @@ class SoundRepository private constructor(
         val state = SoundState(gainsDb = gainsDb, presetId = null).normalized()
         val id = db.profiles().insert(ProfileEntity(name = name, stateJson = SoundStateJson.encode(state), updatedAt = now()))
         editDevice(key, label) { it.copy(profileId = id, suggestion = SUGGESTION_DONE) }
-        if (load) setWorking(state, Profile(id, name, state))
+        if (load) {
+            setWorking(state, Profile(id, name, state))
+            rememberDevice(key)
+        }
         id
     }
 

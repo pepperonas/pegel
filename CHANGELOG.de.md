@@ -4,6 +4,17 @@ Alle nennenswerten Änderungen an Pegel. Format nach
 [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach
 [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.1.1] - 2026-11-26
+
+### Behoben
+
+- **Effekteinstellungen (wie Loudness und Virtualizer) schalten sich nicht mehr von selbst aus.**
+  War ein Gerät an ein Profil gebunden (z. B. durch einen Klangvorschlag) und du hast danach Effekte
+  eingeschaltet, konnte ein Wechsel der Audioausgabe oder der Start des Dienstes das alte Profil
+  erneut laden und diese Änderungen verwerfen. Pegel speichert Änderungen am aktiven Profil jetzt
+  beim Gerätewechsel, lädt ein bereits aktives Profil nicht erneut darüber und merkt sich beim
+  Übernehmen eines Vorschlags sofort das aktive Gerät.
+
 ## [1.1.0] - 2026-11-15
 
 ### Neu

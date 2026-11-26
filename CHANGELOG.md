@@ -4,6 +4,17 @@ All notable changes to Pegel. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-11-26
+
+### Fixed
+
+- **Effect settings (such as loudness and virtualizer) no longer switch themselves off.** When a
+  device had a bound profile (for example from a sound suggestion) and you turned on effects
+  afterwards, switching outputs or starting the service could reload the old profile and wipe out
+  those changes. Pegel now keeps edits to the active profile when switching devices, never reloads
+  a profile that is already active, and remembers the active device right away when applying a
+  suggestion.
+
 ## [1.1.0] - 2026-11-15
 
 ### Added

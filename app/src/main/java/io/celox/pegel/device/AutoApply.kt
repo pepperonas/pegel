@@ -19,6 +19,12 @@ class AutoApply(private val repo: SoundRepository) {
         repo.rememberDevice(device.key)
         repo.seeDevice(device.key, device.name.trim())
         val profile = repo.profileForDevice(device.key) ?: return null
+        // Already on this profile (e.g. after visiting a device without its own profile): do not
+        // reload over what the user changed since.
+        if (repo.activeProfile.value?.id == profile.id) return null
+        // Keep edits made to the previous profile so returning to its device brings them back
+        // instead of silently resetting effects the user switched on.
+        if (repo.modified.value) repo.saveActiveProfile()
         repo.loadProfile(profile.id)
         return profile
     }

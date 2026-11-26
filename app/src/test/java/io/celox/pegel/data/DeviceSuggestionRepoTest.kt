@@ -60,6 +60,17 @@ class DeviceSuggestionRepoTest {
         assertEquals(profile.id, device().profileId)
         assertEquals("done", device().suggestion)
         assertEquals(profile.id, repo.profileForDevice(key)?.id)
+        assertEquals(key, repo.lastDeviceKey)
+    }
+
+    @Test
+    fun `applying a suggestion remembers the active device so starting the service does not wipe edits`() = runBlocking {
+        repo.applySuggestion(key, "JBL Charge 4", "JBL Charge 4", gains)
+        repo.update { it.copy(loudnessOn = true, virtualizerOn = true) }
+        val device = io.celox.pegel.device.OutputDevice(io.celox.pegel.device.DeviceKind.BLUETOOTH, "JBL Charge 4")
+        assertNull(io.celox.pegel.device.AutoApply(repo).onActiveDevice(device))
+        assertEquals(true, repo.state.value.loudnessOn)
+        assertEquals(true, repo.state.value.virtualizerOn)
     }
 
     @Test

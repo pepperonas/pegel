@@ -89,6 +89,7 @@ class AutoApplyTest {
     @Test
     fun `a restart on the same device does not undo unsaved changes`() = runBlocking {
         val loud = profile("Loud", 6f)
+        val quiet = profile("Quiet", -6f)
         repo.bindDevice(buds.key, loud)
         auto.onActiveDevice(buds)
         repo.update { it.withGain(0, 2f) }
@@ -97,7 +98,39 @@ class AutoApplyTest {
         assertNull(AutoApply(afterRestart).onActiveDevice(buds))
         assertEquals(2f, afterRestart.state.value.gainsDb[0])
         // a different device still gets its profile
-        afterRestart.bindDevice(speaker.key, loud)
-        assertEquals("Loud", AutoApply(afterRestart).onActiveDevice(speaker)!!.name)
+        afterRestart.bindDevice(speaker.key, quiet)
+        assertEquals("Quiet", AutoApply(afterRestart).onActiveDevice(speaker)!!.name)
+    }
+
+    @Test
+    fun `returning from a device without a profile does not wipe out changes to the active profile`() = runBlocking {
+        val loud = profile("Loud", 6f)
+        repo.bindDevice(buds.key, loud)
+        auto.onActiveDevice(buds)
+        repo.update { it.copy(loudnessOn = true, virtualizerOn = true) }
+
+        assertNull(auto.onActiveDevice(speaker))
+        assertNull(auto.onActiveDevice(buds))
+        assertEquals(true, repo.state.value.loudnessOn)
+        assertEquals(true, repo.state.value.virtualizerOn)
+    }
+
+    @Test
+    fun `switching to another device saves edits to the previous profile so they survive returning`() = runBlocking {
+        val budsProfile = profile("Buds", 6f)
+        val speakerProfile = profile("Speaker", -3f)
+        repo.bindDevice(buds.key, budsProfile)
+        repo.bindDevice(speaker.key, speakerProfile)
+
+        auto.onActiveDevice(buds)
+        repo.update { it.copy(loudnessOn = true, virtualizerOn = true) }
+
+        assertEquals("Speaker", auto.onActiveDevice(speaker)!!.name)
+        assertEquals(false, repo.state.value.loudnessOn)
+        assertEquals(false, repo.state.value.virtualizerOn)
+
+        assertEquals("Buds", auto.onActiveDevice(buds)!!.name)
+        assertEquals(true, repo.state.value.loudnessOn)
+        assertEquals(true, repo.state.value.virtualizerOn)
     }
 }
